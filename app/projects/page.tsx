@@ -12,6 +12,8 @@ declare global {
   }
 }
 
+export {};
+
 type Size = { w: number; h: number };
 const DESIGN: Size = { w: 1920, h: 1080 };
 
