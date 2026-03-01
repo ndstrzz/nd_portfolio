@@ -11,7 +11,7 @@ declare global {
     }
   }
 }
-
+//
 export {};
 
 type Size = { w: number; h: number };
