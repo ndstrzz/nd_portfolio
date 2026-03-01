@@ -4,6 +4,13 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "model-viewer": any;
+    }
+  }
+}
 
 type Size = { w: number; h: number };
 const DESIGN: Size = { w: 1920, h: 1080 };
