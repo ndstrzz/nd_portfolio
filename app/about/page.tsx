@@ -1,6 +1,6 @@
 // C:\Users\User\Downloads\andy_portfolio\app\about\page.tsx
 "use client";
-
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -97,7 +97,7 @@ function IconButton({
 }: {
   href: string;
   ariaLabel: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <a
