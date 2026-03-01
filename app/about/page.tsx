@@ -4,16 +4,6 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      "model-viewer": any;
-    }
-  }
-}
-
-export {};
-
 type Size = { w: number; h: number };
 const DESIGN: Size = { w: 1920, h: 1080 };
 
@@ -343,7 +333,7 @@ export default function AboutPage() {
 
           {/* FRONT */}
           <div style={{ position: "absolute", inset: 0, zIndex: 2 }}>
-            {/* ✅ Kuro waving gif (use <img> to guarantee visibility + animation) */}
+            {/* ✅ Kuro waving gif */}
             <img
               src="/assets/kuro_waving.gif"
               alt="Kuro waving"
@@ -562,7 +552,6 @@ export default function AboutPage() {
                 gap: SOFT_POS.rowGap,
               }}
             >
-              {/* Multilingual (with bullet) */}
               <BulletRow
                 label="Multilingual"
                 bulletSrc="/assets/soft_skill_bullet.svg"
@@ -573,7 +562,6 @@ export default function AboutPage() {
                 color={SOFT_POS.color}
               />
 
-              {/* Languages (NO bullet) */}
               <div style={{ paddingLeft: SOFT_POS.bullet.w + SOFT_POS.gapBulletToText }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: SOFT_POS.rowGap }}>
                   {["English", "Chinese", "Bahasa Indonesia", "Korean"].map((t) => (
@@ -582,7 +570,6 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Remaining bullets */}
               {["Global Adaptability", "High-Pressure Performance", "Strategic & Detail-Oriented"].map((t) => (
                 <BulletRow
                   key={t}
@@ -640,4 +627,3 @@ export default function AboutPage() {
     </main>
   );
 }
-//
