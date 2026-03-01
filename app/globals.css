@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* C:\Users\User\Downloads\andy_portfolio\app\globals.css */
+
+@font-face {
+  font-family: "THICCCBOI";
+  src: url("/assets/fonts/THICCCBOI-EXTRABOLD.TTF") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
