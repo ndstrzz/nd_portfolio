@@ -1,24 +1,13 @@
-// C:\Users\User\Downloads\andy_portfolio\app\projects\page.tsx
+// C:\Users\User\Downloads\andy_portfolio\app\about\page.tsx
 "use client";
 import type { ReactNode } from "react";
 import Image from "next/image";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      "model-viewer": any;
-    }
-  }
-}
-//
-export {};
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Size = { w: number; h: number };
 const DESIGN: Size = { w: 1920, h: 1080 };
 
-const CONTENT_PAD_TOP = 140;
-
+// NAV positions (same as homepage)
 const NAV_POS = {
   ndLogo: { x: 36, y: 15, w: 357.24, h: 97 },
   nav: { x: 406, y: 55, h: 18, gap: 47 },
@@ -26,19 +15,48 @@ const NAV_POS = {
   topIcons: { x: 1669, y: 51, w: 31, h: 26, gap: 27 },
 };
 
-// From your screenshots (Frame 14)
-const PROJ_POS = {
-  header: { x: 192, y: 39, w: 812.35, h: 132 }, // project_icon_with_description.svg
-  personalTitle: { x: 62, y: 200, w: 735.35, h: 37 }, // personal_project.svg
+// ABOUT positions
+const ABOUT_POS = {
+  aboutIcon: { x: 200, y: 233, w: 46, h: 46 },
+  aboutTitle: { x: 266, y: 229, w: 231, h: 55 },
+  aboutDesc: { x: 266, y: 297.53, w: 735.35, h: 132 },
+};
 
-  taedalFolder: { x: 243, y: 237, w: 179, h: 167 }, // taedal_folder.svg
+// HARD SKILLS positions
+const HARD_POS = {
+  header: { x: 266, y: 471, w: 735.35, h: 73.53 }, // hard_skills_with_description.svg
+  list: { x: 266, y: 567 },
+  bullet: { w: 26, h: 26 },
+  fontSize: 20,
+  color: "#AAAAAA",
+  gapBulletToText: 15,
+  rowGap: 17,
+  colGap12: 35,
+  colGap23: 40,
+  colW: 155,
+  colH: 284,
+};
 
-  internshipsTitle: { x: 2, y: 440, w: 735.35, h: 37 }, // internships.svg
-  ocbcFolder: { x: 243, y: 469, w: 181, h: 167 }, // ocbc_folder.svg
+// SOFT SKILLS positions
+const SOFT_POS = {
+  header: { x: 1063, y: 471, w: 735.35, h: 73.53 }, // soft_skill_with_description.svg
+  leftList: { x: 1063, y: 567, w: 302, h: 328 },
+  rightList: { x: 1063 + 302 + 66, y: 567, w: 302, h: 328 }, // gap 66
+  bullet: { w: 27, h: 27 }, // soft_skill_bullet.svg
+  line: { x: 1077, y: 616, w: 3, h: 142 }, // line_vertical.svg
+  gapBulletToText: 14,
+  rowGap: 20,
+  fontSize: 20,
+  color: "#AAAAAA",
+};
 
-  hackathonsTitle: { x: 32, y: 672, w: 735.35, h: 37 }, // hackathons.svg
-  ideunFolder: { x: 243, y: 701, w: 179, h: 167 }, // ideun_folder.svg
-  chinguFolder: { x: 458, y: 701, w: 179, h: 167 }, // chingu_folder.svg
+// KURO on About page
+const KURO_ABOUT = { x: -464, y: 370, w: 600, h: 900 };
+
+const COLORS = {
+  accent1: "#09EFD6",
+  accent2: "#1FAC94",
+  gray: "#AAAAAA",
 };
 
 function useFitScale(design: Size) {
@@ -132,627 +150,81 @@ function Asset({
   );
 }
 
-/**
- * FolderButton
- * - keeps your hover glow/sweep
- * - if onClick is provided: prevents navigation + triggers overlay
- */
-function FolderButton({
-  href,
-  ariaLabel,
-  src,
-  alt,
-  x,
-  y,
-  w,
-  h,
-  priority,
-  onClick,
+function BulletRow({
+  label,
+  bulletSrc,
+  bulletW,
+  bulletH,
+  gap,
+  fontSize,
+  color,
 }: {
-  href: string;
-  ariaLabel: string;
-  src: string;
-  alt: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  priority?: boolean;
-  onClick?: () => void;
+  label: string;
+  bulletSrc: string;
+  bulletW: number;
+  bulletH: number;
+  gap: number;
+  fontSize: number;
+  color: string;
 }) {
-  const [hover, setHover] = useState(false);
-
   return (
-    <a
-      href={href}
-      aria-label={ariaLabel}
-      style={{
-        position: "absolute",
-        left: x,
-        top: y,
-        width: w,
-        height: h,
-        display: "block",
-        textDecoration: "none",
-        cursor: "pointer",
-        outline: "none",
-        WebkitTapHighlightColor: "transparent",
-        transform: hover ? "translateY(-8px)" : "translateY(0px)",
-        transition: "transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1)",
-      }}
-      onClick={(e) => {
-        if (onClick) {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocus={() => setHover(true)}
-      onBlur={() => setHover(false)}
-    >
-      <div style={{ position: "absolute", inset: 0 }}>
-        <Image
-          src={src}
-          alt={alt}
-          width={Math.round(w)}
-          height={Math.round(h)}
-          priority={priority}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            animation: hover ? "edgeFlicker 1.05s infinite" : "none",
-            willChange: "filter",
-          }}
-        />
-      </div>
-
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          opacity: hover ? 1 : 0,
-          transition: "opacity 180ms ease",
-          WebkitMaskImage: `url(${src})`,
-          WebkitMaskRepeat: "no-repeat",
-          WebkitMaskPosition: "center",
-          WebkitMaskSize: "contain",
-          maskImage: `url(${src})`,
-          maskRepeat: "no-repeat",
-          maskPosition: "center",
-          maskSize: "contain",
-          background:
-            "linear-gradient(115deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.00) 70%)",
-          mixBlendMode: "screen",
-          filter: "blur(2px)",
-          animation: hover ? "edgeSweep 700ms infinite" : "none",
-        }}
+    <div style={{ display: "flex", alignItems: "center", gap, height: bulletH }}>
+      <Image
+        src={bulletSrc}
+        alt="bullet"
+        width={bulletW}
+        height={bulletH}
+        style={{ width: bulletW, height: bulletH, objectFit: "contain" }}
       />
-    </a>
-  );
-}
-
-/**
- * VideoCard
- * - autoplay (muted) when it appears (browser policy)
- * - when user clicks play, it UNMUTES and plays with sound
- * - center play/pause only shows on hover (or when paused)
- */
-function VideoCard({
-  src,
-  autoPlay,
-}: {
-  src: string;
-  autoPlay?: boolean;
-}) {
-  const videoRef = React.useRef<HTMLVideoElement | null>(null);
-  const [ready, setReady] = React.useState(false);
-  const [playing, setPlaying] = React.useState(false);
-  const [hover, setHover] = React.useState(false);
-  const [muted, setMuted] = React.useState(true);
-
-  const playWithSound = async () => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = false;
-    v.volume = 1;
-    setMuted(false);
-    try {
-      await v.play();
-    } catch {}
-  };
-
-  const togglePlay = async () => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    if (v.paused) {
-      await playWithSound();
-    } else {
-      v.pause();
-    }
-  };
-
-  const toggleMute = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    const next = !v.muted;
-    v.muted = next;
-    setMuted(next);
-    if (!next) v.volume = 1;
-  };
-
-  React.useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
-
-    v.addEventListener("play", onPlay);
-    v.addEventListener("pause", onPause);
-    return () => {
-      v.removeEventListener("play", onPlay);
-      v.removeEventListener("pause", onPause);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    const v = videoRef.current;
-    if (!v || !autoPlay) return;
-
-    const t = window.setTimeout(async () => {
-      try {
-        v.muted = true;
-        setMuted(true);
-        await v.play();
-      } catch {}
-    }, 180);
-
-    return () => window.clearTimeout(t);
-  }, [autoPlay]);
-
-  const showCenterBtn = ready && (hover || !playing);
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        borderRadius: 18,
-        overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.10)",
-        background: "rgba(255,255,255,0.03)",
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={togglePlay}
-    >
-      <video
-        ref={videoRef}
-        src={src}
-        playsInline
-        preload="metadata"
-        muted
-        onCanPlay={() => setReady(true)}
+      <span
         style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          display: "block",
-          cursor: "pointer",
-        }}
-      />
-
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: showCenterBtn ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.08)",
-          transition: "background 180ms ease",
-          pointerEvents: "none",
-        }}
-      />
-
-      <button
-        type="button"
-        aria-label={muted ? "Unmute" : "Mute"}
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleMute();
-        }}
-        style={{
-          position: "absolute",
-          right: 14,
-          top: 14,
-          width: 44,
-          height: 44,
-          borderRadius: 14,
-          border: "1px solid rgba(255,255,255,0.18)",
-          background: "rgba(0,0,0,0.35)",
-          color: "white",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          opacity: hover ? 1 : 0,
-          transform: hover ? "translateY(0px)" : "translateY(-6px)",
-          transition: "opacity 160ms ease, transform 160ms ease",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
+          fontFamily: "THICCCBOI, system-ui, -apple-system, Segoe UI, Roboto, Arial",
+          fontWeight: 800,
+          fontSize,
+          color,
+          lineHeight: `${bulletH}px`,
+          whiteSpace: "nowrap",
         }}
       >
-        {muted ? "🔇" : "🔊"}
-      </button>
-
-      <button
-        type="button"
-        aria-label={playing ? "Pause video" : "Play video"}
-        onClick={(e) => {
-          e.stopPropagation();
-          togglePlay();
-        }}
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: showCenterBtn
-            ? "translate(-50%, -50%) scale(1)"
-            : "translate(-50%, -50%) scale(0.96)",
-          width: 82,
-          height: 82,
-          borderRadius: 999,
-          border: "1px solid rgba(255,255,255,0.22)",
-          background: "rgba(0,0,0,0.42)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          opacity: showCenterBtn ? 1 : 0,
-          transition: "opacity 160ms ease, transform 160ms ease",
-        }}
-      >
-        <span
-          style={{
-            color: "white",
-            fontSize: 26,
-            lineHeight: 1,
-            transform: playing ? "translateX(0px)" : "translateX(1px)",
-          }}
-        >
-          {playing ? "❚❚" : "▶"}
-        </span>
-      </button>
+        {label}
+      </span>
     </div>
   );
 }
 
-type FolderKey = "taedal" | "ocbc" | "ideun" | "chingu";
-
-type FolderOverlayConfig = {
-  key: FolderKey;
-  folderSrc: string;
-  from: { x: number; y: number; w: number; h: number };
-  expanded: { w: number; h: number };
-  dock: { x: number; y: number };
-  panel: { w: number; h: number; gap: number; dy?: number };
-};
-
-const FIND_OUT_MORE_SRC = "/assets/taedal-deck/find_out_more.svg";
-
-// ✅ Your requested video panel dimensions
-const VIDEO_DIM = { w: 1380, h: 920 };
-
-// ✅ Video source per folder (you can add ideun/chingu later)
-const VIDEO_BY_FOLDER: Record<FolderKey, string> = {
-  ocbc: "/assets/folder/ocbc/ideun_video.mp4",
-  taedal: "/assets/folder/taedal/taedal_video.mp4",
-  ideun: "/assets/folder/ideun/ideun_video.mp4",
-  chingu: "/assets/folder/ideun/ideun_video.mp4", // placeholder for now
-};
-
-const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
-  taedal: {
-    key: "taedal",
-    folderSrc: "/assets/taedal_folder.svg",
-    from: PROJ_POS.taedalFolder,
-    expanded: { w: 355, h: 328.4 },
-    dock: { x: 70, y: -10 },
-    panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
-  },
-  ocbc: {
-    key: "ocbc",
-    folderSrc: "/assets/ocbc_folder.svg",
-    from: PROJ_POS.ocbcFolder,
-    expanded: { w: 355, h: 328.4 },
-    dock: { x: 70, y: -10 },
-    panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
-  },
-  ideun: {
-    key: "ideun",
-    folderSrc: "/assets/ideun_folder.svg",
-    from: PROJ_POS.ideunFolder,
-    expanded: { w: 355, h: 328.4 },
-    dock: { x: 70, y: -10 },
-    panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
-  },
-  chingu: {
-    key: "chingu",
-    folderSrc: "/assets/chingu_folder.svg",
-    from: PROJ_POS.chinguFolder,
-    expanded: { w: 355, h: 328.4 },
-    dock: { x: 70, y: -10 },
-    panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
-  },
-};
-
-function FolderOverlay({
-  cfg,
-  scale,
-  onClose,
+// Same styling but without bullet
+function TextRow({
+  label,
+  fontSize,
+  color,
+  height,
 }: {
-  cfg: FolderOverlayConfig;
-  scale: number;
-  onClose: () => void;
+  label: string;
+  fontSize: number;
+  color: string;
+  height: number;
 }) {
-  const [phase, setPhase] = useState<"from" | "center" | "dock">("from");
-  const [showPanel, setShowPanel] = useState(false);
-
-  useEffect(() => {
-    const t = window.setTimeout(() => setPhase("center"), 40);
-    return () => window.clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  const fromRect = {
-    x: cfg.from.x,
-    y: cfg.from.y + CONTENT_PAD_TOP,
-    w: cfg.from.w,
-    h: cfg.from.h,
-  };
-
-  const centerRect = {
-    x: (DESIGN.w - cfg.expanded.w) / 2,
-    y: (DESIGN.h - cfg.expanded.h) / 2 + 10,
-    w: cfg.expanded.w,
-    h: cfg.expanded.h,
-  };
-
-  const dockRect = {
-    x: cfg.dock.x,
-    y: cfg.dock.y + CONTENT_PAD_TOP,
-    w: cfg.expanded.w,
-    h: cfg.expanded.h,
-  };
-
-  const rect = phase === "from" ? fromRect : phase === "center" ? centerRect : dockRect;
-  const panelTop = dockRect.y + (cfg.panel.dy ?? 0);
-
-  const videoSrc = VIDEO_BY_FOLDER[cfg.key];
-
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 70,
-        animation: "folderOverlayIn 220ms ease-out both",
-      }}
-    >
-      <style>{`
-        @keyframes edgeFlicker {
-          0%   { filter: drop-shadow(0 0 0px rgba(255,255,255,0.0))
-                         drop-shadow(0 0 0px rgba(255,255,255,0.0))
-                         brightness(1); }
-          8%   { filter: drop-shadow(0 0 6px rgba(255,255,255,0.20))
-                         drop-shadow(0 0 14px rgba(255,255,255,0.12))
-                         brightness(1.04); }
-          14%  { filter: drop-shadow(0 0 2px rgba(255,255,255,0.08))
-                         drop-shadow(0 0 8px rgba(255,255,255,0.06))
-                         brightness(1.01); }
-          22%  { filter: drop-shadow(0 0 9px rgba(255,255,255,0.26))
-                         drop-shadow(0 0 22px rgba(255,255,255,0.14))
-                         brightness(1.06); }
-          38%  { filter: drop-shadow(0 0 3px rgba(255,255,255,0.10))
-                         drop-shadow(0 0 10px rgba(255,255,255,0.08))
-                         brightness(1.02); }
-          55%  { filter: drop-shadow(0 0 10px rgba(255,255,255,0.30))
-                         drop-shadow(0 0 26px rgba(255,255,255,0.16))
-                         brightness(1.07); }
-          70%  { filter: drop-shadow(0 0 4px rgba(255,255,255,0.12))
-                         drop-shadow(0 0 12px rgba(255,255,255,0.09))
-                         brightness(1.03); }
-          100% { filter: drop-shadow(0 0 8px rgba(255,255,255,0.22))
-                         drop-shadow(0 0 18px rgba(255,255,255,0.12))
-                         brightness(1.05); }
-        }
-
-        @keyframes edgeSweep {
-          0%   { opacity: 0.0; transform: translateX(-18px) translateY(8px) rotate(-8deg); }
-          35%  { opacity: 0.55; }
-          55%  { opacity: 0.18; }
-          100% { opacity: 0.0; transform: translateX(18px) translateY(-8px) rotate(-8deg); }
-        }
-
-        @keyframes folderOverlayIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to   { opacity: 1; transform: translateY(0px); }
-        }
-      `}</style>
-
-      <div
-        onClick={onClose}
+    <div style={{ display: "flex", alignItems: "center", height }}>
+      <span
         style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0,0,0,0.55)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
-        }}
-      />
-
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: 0,
-          transform: `translateX(-50%) scale(${scale})`,
-          transformOrigin: "top center",
-          width: DESIGN.w,
-          height: "100vh",
-          pointerEvents: "none",
+          fontFamily: "THICCCBOI, system-ui, -apple-system, Segoe UI, Roboto, Arial",
+          fontWeight: 800,
+          fontSize,
+          color,
+          lineHeight: `${height}px`,
+          whiteSpace: "nowrap",
         }}
       >
-        {/* Animated folder */}
-        <div
-          style={{
-            position: "absolute",
-            left: rect.x,
-            top: rect.y,
-            width: rect.w,
-            height: rect.h,
-            pointerEvents: "auto",
-            borderRadius: 18,
-            overflow: "hidden",
-            transition:
-              "left 520ms cubic-bezier(.2,.9,.2,1), top 520ms cubic-bezier(.2,.9,.2,1), width 520ms cubic-bezier(.2,.9,.2,1), height 520ms cubic-bezier(.2,.9,.2,1), box-shadow 520ms ease",
-            boxShadow:
-              phase === "from"
-                ? "0 0 0 rgba(0,0,0,0)"
-                : "0 28px 80px rgba(0,0,0,0.55)",
-          }}
-          onClick={(e) => e.stopPropagation()}
-          onTransitionEnd={(e) => {
-            if (e.propertyName !== "left" && e.propertyName !== "width") return;
-
-            if (phase === "center") {
-              setPhase("dock");
-              window.setTimeout(() => setShowPanel(true), 160);
-            }
-          }}
-        >
-          <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.02)" }} />
-          <Image
-            src={cfg.folderSrc}
-            alt={`${cfg.key} folder enlarged`}
-            width={Math.round(rect.w)}
-            height={Math.round(rect.h)}
-            priority
-            style={{ width: "100%", height: "100%", objectFit: "contain" }}
-          />
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close folder popup"
-            style={{
-              position: "absolute",
-              right: 14,
-              top: 14,
-              width: 36,
-              height: 36,
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: "rgba(0,0,0,0.35)",
-              color: "white",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 18,
-            }}
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Right-side panel */}
-        <div
-          style={{
-            position: "absolute",
-            left: dockRect.x + dockRect.w + cfg.panel.gap,
-            top: panelTop,
-            width: cfg.panel.w,
-            height: cfg.panel.h,
-            pointerEvents: "auto",
-            opacity: showPanel ? 1 : 0,
-            transform: showPanel ? "translateX(0px)" : "translateX(14px)",
-            transition: "opacity 360ms ease, transform 360ms ease",
-            borderRadius: 20,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(0,0,0,0.30)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            boxShadow: "0 24px 70px rgba(0,0,0,0.35)",
-            overflow: "hidden",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              padding: 14,
-              display: "flex",
-              flexDirection: "column",
-              gap: 14,
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <VideoCard src={videoSrc} autoPlay />
-            </div>
-
-            <button
-              type="button"
-              aria-label="Find out more"
-              onClick={() => {
-                // later:
-                // window.location.href = `/projects/${cfg.key}`;
-              }}
-              style={{
-                width: "fit-content",
-                background: "transparent",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                alignSelf: "flex-start",
-              }}
-            >
-              <Image
-                src={FIND_OUT_MORE_SRC}
-                alt="Find out more"
-                width={220}
-                height={56}
-                priority
-                style={{ width: 220, height: "auto", objectFit: "contain" }}
-              />
-            </button>
-          </div>
-        </div>
-      </div>
+        {label}
+      </span>
     </div>
   );
 }
 
-export default function ProjectsPage() {
+export default function AboutPage() {
   const { stageRef, scale } = useFitScale(DESIGN);
-  const [openKey, setOpenKey] = useState<FolderKey | null>(null);
 
-  // Load model-viewer once
   useEffect(() => {
     const id = "model-viewer-script";
     if (document.getElementById(id)) return;
@@ -783,7 +255,21 @@ export default function ProjectsPage() {
     []
   );
 
-  const cfg = openKey ? FOLDERS[openKey] : null;
+  const hardCol1 = ["Python", "React.js", "Javascript", "Typescript", "Solidity", "HTML + CSS", "Dart"];
+  const hardCol2 = ["Tailwind CSS", "Blender", "Framer Option", "Adobe Illustrator", "Adobe Photoshop", "Figma", "Powerpoint"];
+  const hardCol3 = ["Procreate", "Electron", "ExpoGo", "Sepolia testnet", "AWS", "Docker", "Kubernetes"];
+
+  // Soft skills
+  const softRight = [
+    "Commitment to Excellence",
+    "Self-Directed Initiative",
+    "Relentless Work Ethic",
+    "High Ambition & Drive",
+    "Resilient Learner",
+    "Active Listener",
+    "Open-Minded Perspective",
+    "Meticulous Attention to Detail",
+  ];
 
   return (
     <main
@@ -798,105 +284,72 @@ export default function ProjectsPage() {
         position: "relative",
       }}
     >
-      {/* Overlay */}
-      {cfg && <FolderOverlay cfg={cfg} scale={scale} onClose={() => setOpenKey(null)} />}
-
-      {/* Keyframes for hover effects */}
-      <style>{`
-        @keyframes edgeFlicker {
-          0%   { filter: drop-shadow(0 0 0px rgba(255,255,255,0.0))
-                         drop-shadow(0 0 0px rgba(255,255,255,0.0))
-                         brightness(1); }
-          8%   { filter: drop-shadow(0 0 6px rgba(255,255,255,0.20))
-                         drop-shadow(0 0 14px rgba(255,255,255,0.12))
-                         brightness(1.04); }
-          14%  { filter: drop-shadow(0 0 2px rgba(255,255,255,0.08))
-                         drop-shadow(0 0 8px rgba(255,255,255,0.06))
-                         brightness(1.01); }
-          22%  { filter: drop-shadow(0 0 9px rgba(255,255,255,0.26))
-                         drop-shadow(0 0 22px rgba(255,255,255,0.14))
-                         brightness(1.06); }
-          38%  { filter: drop-shadow(0 0 3px rgba(255,255,255,0.10))
-                         drop-shadow(0 0 10px rgba(255,255,255,0.08))
-                         brightness(1.02); }
-          55%  { filter: drop-shadow(0 0 10px rgba(255,255,255,0.30))
-                         drop-shadow(0 0 26px rgba(255,255,255,0.16))
-                         brightness(1.07); }
-          70%  { filter: drop-shadow(0 0 4px rgba(255,255,255,0.12))
-                         drop-shadow(0 0 12px rgba(255,255,255,0.09))
-                         brightness(1.03); }
-          100% { filter: drop-shadow(0 0 8px rgba(255,255,255,0.22))
-                         drop-shadow(0 0 18px rgba(255,255,255,0.12))
-                         brightness(1.05); }
-        }
-
-        @keyframes edgeSweep {
-          0%   { opacity: 0.0; transform: translateX(-18px) translateY(8px) rotate(-8deg); }
-          35%  { opacity: 0.55; }
-          55%  { opacity: 0.18; }
-          100% { opacity: 0.0; transform: translateX(18px) translateY(-8px) rotate(-8deg); }
-        }
-      `}</style>
-
-      {/* Fixed background */}
       <div
         style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: "none",
-          background: "#000000",
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          width: DESIGN.w,
+          height: DESIGN.h,
+          transform: `translate(-50%, -50%) scale(${scale})`,
+          transformOrigin: "center",
         }}
       >
         <div
           style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 860,
-            height: 860,
+            width: "100%",
+            height: "100%",
+            position: "relative",
+            overflow: "hidden",
+            background: "#000000",
           }}
         >
-          <model-viewer
-            src="/assets/taedal-coin.glb"
-            camera-controls
-            auto-rotate
-            rotation-per-second="20deg"
-            disable-zoom
-            shadow-intensity="0"
-            exposure="1"
-            style={{ width: "100%", height: "100%", background: "transparent" }}
-          />
-        </div>
-        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
-      </div>
+          {/* BACK */}
+          <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 860,
+                height: 860,
+              }}
+            >
+              <model-viewer
+                src="/assets/taedal-coin.glb"
+                camera-controls
+                auto-rotate
+                rotation-per-second="20deg"
+                disable-zoom
+                shadow-intensity="0"
+                exposure="1"
+                style={{ width: "100%", height: "100%", background: "transparent" }}
+              />
+            </div>
 
-      {/* Fixed navbar */}
-      <div
-        style={{
-          position: "fixed",
-          left: "50%",
-          top: 0,
-          transform: `translateX(-50%) scale(${scale})`,
-          transformOrigin: "top center",
-          width: DESIGN.w,
-          height: 120,
-          zIndex: 10,
-          pointerEvents: "none",
-        }}
-      >
-        <div style={{ position: "relative", width: DESIGN.w, height: 120 }}>
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(0,0,0,1)",
-              borderBottom: "1px solid rgba(255,255,255,0.08)",
-            }}
-          />
+            <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
+          </div>
 
-          <div style={{ position: "absolute", inset: 0, pointerEvents: "auto" }}>
+          {/* FRONT */}
+          <div style={{ position: "absolute", inset: 0, zIndex: 2 }}>
+            {/* ✅ Kuro waving gif */}
+            <img
+              src="/assets/kuro_waving.gif"
+              alt="Kuro waving"
+              style={{
+                position: "absolute",
+                left: KURO_ABOUT.x,
+                top: KURO_ABOUT.y,
+                width: KURO_ABOUT.w,
+                height: KURO_ABOUT.h,
+                objectFit: "contain",
+                zIndex: 5,
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* Navbar */}
             <Asset
               src="/assets/ND_Logo.svg"
               alt="ND Logo"
@@ -916,7 +369,6 @@ export default function ProjectsPage() {
                 display: "flex",
                 alignItems: "center",
                 gap: NAV_POS.nav.gap,
-                userSelect: "none",
               }}
             >
               {navItems.map((item) => (
@@ -927,7 +379,7 @@ export default function ProjectsPage() {
                       alt={item.alt}
                       width={NAV_POS.navItem.w}
                       height={NAV_POS.navItem.h}
-                      priority={item.alt === "Projects"}
+                      priority={item.alt === "About"}
                       style={{ width: "100%", height: "100%", objectFit: "contain" }}
                     />
                   </div>
@@ -959,116 +411,216 @@ export default function ProjectsPage() {
                 </IconButton>
               ))}
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Content */}
-      <div style={{ position: "relative", zIndex: 2, width: "100%", height: "100%" }}>
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: 0,
-            transform: `translateX(-50%) scale(${scale})`,
-            transformOrigin: "top center",
-            width: DESIGN.w,
-            height: DESIGN.h,
-            paddingTop: CONTENT_PAD_TOP,
-          }}
-        >
-          <div style={{ position: "relative", width: DESIGN.w, height: DESIGN.h }}>
+            {/* About */}
             <Asset
-              src="/assets/project_icon_with_description.svg"
-              alt="Projects header"
-              x={PROJ_POS.header.x}
-              y={PROJ_POS.header.y}
-              w={PROJ_POS.header.w}
-              h={PROJ_POS.header.h}
+              src="/assets/about_me_icon.svg"
+              alt="About icon"
+              x={ABOUT_POS.aboutIcon.x}
+              y={ABOUT_POS.aboutIcon.y}
+              w={ABOUT_POS.aboutIcon.w}
+              h={ABOUT_POS.aboutIcon.h}
               priority
             />
-
             <Asset
-              src="/assets/personal_project.svg"
-              alt="Personal Projects"
-              x={PROJ_POS.personalTitle.x}
-              y={PROJ_POS.personalTitle.y}
-              w={PROJ_POS.personalTitle.w}
-              h={PROJ_POS.personalTitle.h}
+              src="/assets/about_me.svg"
+              alt="About title"
+              x={ABOUT_POS.aboutTitle.x}
+              y={ABOUT_POS.aboutTitle.y}
+              w={ABOUT_POS.aboutTitle.w}
+              h={ABOUT_POS.aboutTitle.h}
               priority
             />
 
-            <FolderButton
-              href="/projects/taedal"
-              ariaLabel="Open Taedal project"
-              src="/assets/taedal_folder.svg"
-              alt="Taedal folder"
-              x={PROJ_POS.taedalFolder.x}
-              y={PROJ_POS.taedalFolder.y}
-              w={PROJ_POS.taedalFolder.w}
-              h={PROJ_POS.taedalFolder.h}
-              priority
-              onClick={() => setOpenKey("taedal")}
-            />
+            <div
+              style={{
+                position: "absolute",
+                left: ABOUT_POS.aboutDesc.x,
+                top: ABOUT_POS.aboutDesc.y,
+                width: ABOUT_POS.aboutDesc.w,
+                height: ABOUT_POS.aboutDesc.h,
+                fontFamily: "THICCCBOI, system-ui, -apple-system, Segoe UI, Roboto, Arial",
+                fontWeight: 800,
+                color: COLORS.gray,
+                fontSize: 19.49,
+                lineHeight: "1.25",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              <span>I am currently a Founder of </span>
+              <span style={{ color: COLORS.accent1 }}>Taedal</span>
+              <span>
+                {" "}
+                where I designed and built this Blockchain art provenance website all on my own from scratch within 3 months. Previously, I was at{" "}
+              </span>
+              <span style={{ color: COLORS.accent1 }}>OCBC</span>
+              <span>
+                {" "}
+                as a UI/UX Designer which i manage to get selected from participating in an{" "}
+              </span>
+              <span style={{ color: COLORS.accent2 }}>OCBC Ignite Hackathon</span>
+              <span>
+                {" "}
+                competing with 168 students. At the same time, I am participating in multiple upcoming Hackathon to expand my creativity and innovation cells while waiting for my enlistment.
+              </span>
+            </div>
 
+            {/* Hard skills header */}
             <Asset
-              src="/assets/internships.svg"
-              alt="Internships"
-              x={PROJ_POS.internshipsTitle.x}
-              y={PROJ_POS.internshipsTitle.y}
-              w={PROJ_POS.internshipsTitle.w}
-              h={PROJ_POS.internshipsTitle.h}
+              src="/assets/hard_skills_with_description.svg"
+              alt="Hard skills header"
+              x={HARD_POS.header.x}
+              y={HARD_POS.header.y}
+              w={HARD_POS.header.w}
+              h={HARD_POS.header.h}
               priority
             />
 
-            <FolderButton
-              href="/projects/ocbc"
-              ariaLabel="Open OCBC project"
-              src="/assets/ocbc_folder.svg"
-              alt="OCBC folder"
-              x={PROJ_POS.ocbcFolder.x}
-              y={PROJ_POS.ocbcFolder.y}
-              w={PROJ_POS.ocbcFolder.w}
-              h={PROJ_POS.ocbcFolder.h}
-              priority
-              onClick={() => setOpenKey("ocbc")}
-            />
+            {/* Hard skills columns */}
+            <div style={{ position: "absolute", left: HARD_POS.list.x, top: HARD_POS.list.y, display: "flex", alignItems: "flex-start" }}>
+              <div style={{ width: HARD_POS.colW, height: HARD_POS.colH, display: "flex", flexDirection: "column", gap: HARD_POS.rowGap }}>
+                {hardCol1.map((t) => (
+                  <BulletRow
+                    key={t}
+                    label={t}
+                    bulletSrc="/assets/hard_skill_bullet.svg"
+                    bulletW={HARD_POS.bullet.w}
+                    bulletH={HARD_POS.bullet.h}
+                    gap={HARD_POS.gapBulletToText}
+                    fontSize={HARD_POS.fontSize}
+                    color={HARD_POS.color}
+                  />
+                ))}
+              </div>
 
+              <div style={{ width: HARD_POS.colGap12 }} />
+
+              <div style={{ width: HARD_POS.colW, height: HARD_POS.colH, display: "flex", flexDirection: "column", gap: HARD_POS.rowGap }}>
+                {hardCol2.map((t) => (
+                  <BulletRow
+                    key={t}
+                    label={t}
+                    bulletSrc="/assets/hard_skill_bullet.svg"
+                    bulletW={HARD_POS.bullet.w}
+                    bulletH={HARD_POS.bullet.h}
+                    gap={HARD_POS.gapBulletToText}
+                    fontSize={HARD_POS.fontSize}
+                    color={HARD_POS.color}
+                  />
+                ))}
+              </div>
+
+              <div style={{ width: HARD_POS.colGap23 }} />
+
+              <div style={{ width: HARD_POS.colW, height: HARD_POS.colH, display: "flex", flexDirection: "column", gap: HARD_POS.rowGap }}>
+                {hardCol3.map((t) => (
+                  <BulletRow
+                    key={t}
+                    label={t}
+                    bulletSrc="/assets/hard_skill_bullet.svg"
+                    bulletW={HARD_POS.bullet.w}
+                    bulletH={HARD_POS.bullet.h}
+                    gap={HARD_POS.gapBulletToText}
+                    fontSize={HARD_POS.fontSize}
+                    color={HARD_POS.color}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Soft skills header */}
             <Asset
-              src="/assets/hackathons.svg"
-              alt="Hackathons"
-              x={PROJ_POS.hackathonsTitle.x}
-              y={PROJ_POS.hackathonsTitle.y}
-              w={PROJ_POS.hackathonsTitle.w}
-              h={PROJ_POS.hackathonsTitle.h}
+              src="/assets/soft_skill_with_description.svg"
+              alt="Soft skills header"
+              x={SOFT_POS.header.x}
+              y={SOFT_POS.header.y}
+              w={SOFT_POS.header.w}
+              h={SOFT_POS.header.h}
               priority
             />
 
-            <FolderButton
-              href="/projects/ideun"
-              ariaLabel="Open Ideun project"
-              src="/assets/ideun_folder.svg"
-              alt="Ideun folder"
-              x={PROJ_POS.ideunFolder.x}
-              y={PROJ_POS.ideunFolder.y}
-              w={PROJ_POS.ideunFolder.w}
-              h={PROJ_POS.ideunFolder.h}
+            {/* Soft skills left column (languages = NO bullets) */}
+            <div
+              style={{
+                position: "absolute",
+                left: SOFT_POS.leftList.x,
+                top: SOFT_POS.leftList.y,
+                width: SOFT_POS.leftList.w,
+                height: SOFT_POS.leftList.h,
+                display: "flex",
+                flexDirection: "column",
+                gap: SOFT_POS.rowGap,
+              }}
+            >
+              <BulletRow
+                label="Multilingual"
+                bulletSrc="/assets/soft_skill_bullet.svg"
+                bulletW={SOFT_POS.bullet.w}
+                bulletH={SOFT_POS.bullet.h}
+                gap={SOFT_POS.gapBulletToText}
+                fontSize={SOFT_POS.fontSize}
+                color={SOFT_POS.color}
+              />
+
+              <div style={{ paddingLeft: SOFT_POS.bullet.w + SOFT_POS.gapBulletToText }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: SOFT_POS.rowGap }}>
+                  {["English", "Chinese", "Bahasa Indonesia", "Korean"].map((t) => (
+                    <TextRow key={t} label={t} fontSize={SOFT_POS.fontSize} color={SOFT_POS.color} height={SOFT_POS.bullet.h} />
+                  ))}
+                </div>
+              </div>
+
+              {["Global Adaptability", "High-Pressure Performance", "Strategic & Detail-Oriented"].map((t) => (
+                <BulletRow
+                  key={t}
+                  label={t}
+                  bulletSrc="/assets/soft_skill_bullet.svg"
+                  bulletW={SOFT_POS.bullet.w}
+                  bulletH={SOFT_POS.bullet.h}
+                  gap={SOFT_POS.gapBulletToText}
+                  fontSize={SOFT_POS.fontSize}
+                  color={SOFT_POS.color}
+                />
+              ))}
+            </div>
+
+            {/* Vertical line */}
+            <Asset
+              src="/assets/line_vertical.svg"
+              alt="Vertical line"
+              x={SOFT_POS.line.x}
+              y={SOFT_POS.line.y}
+              w={SOFT_POS.line.w}
+              h={SOFT_POS.line.h}
               priority
-              onClick={() => setOpenKey("ideun")}
             />
 
-            <FolderButton
-              href="/projects/chingu"
-              ariaLabel="Open Chingu project"
-              src="/assets/chingu_folder.svg"
-              alt="Chingu folder"
-              x={PROJ_POS.chinguFolder.x}
-              y={PROJ_POS.chinguFolder.y}
-              w={PROJ_POS.chinguFolder.w}
-              h={PROJ_POS.chinguFolder.h}
-              priority
-              onClick={() => setOpenKey("chingu")}
-            />
+            {/* Soft skills right column */}
+            <div
+              style={{
+                position: "absolute",
+                left: SOFT_POS.rightList.x,
+                top: SOFT_POS.rightList.y,
+                width: SOFT_POS.rightList.w,
+                height: SOFT_POS.rightList.h,
+                display: "flex",
+                flexDirection: "column",
+                gap: SOFT_POS.rowGap,
+              }}
+            >
+              {softRight.map((t) => (
+                <BulletRow
+                  key={t}
+                  label={t}
+                  bulletSrc="/assets/soft_skill_bullet.svg"
+                  bulletW={SOFT_POS.bullet.w}
+                  bulletH={SOFT_POS.bullet.h}
+                  gap={SOFT_POS.gapBulletToText}
+                  fontSize={SOFT_POS.fontSize}
+                  color={SOFT_POS.color}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
