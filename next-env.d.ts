@@ -1,8 +1,12 @@
 /// <reference types="next" />
 /// <reference types="next/image-types/global" />
 
-declare namespace JSX {
-  interface IntrinsicElements {
-    "model-viewer": any;
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "model-viewer": any;
+    }
   }
 }
+
+export {};
