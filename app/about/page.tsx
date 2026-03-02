@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type Size = { w: number; h: number };
 const DESIGN: Size = { w: 1920, h: 1080 };
-
+//
 // NAV positions (same as homepage)
 const NAV_POS = {
   ndLogo: { x: 36, y: 15, w: 357.24, h: 97 },
