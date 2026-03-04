@@ -503,7 +503,7 @@ export default function ExperiencePage() {
 
   const iconItems = useMemo(
     () => [
-      { src: "/assets/email_icon.svg", alt: "Email", href: "mailto:you@example.com" },
+      { src: "/assets/email_icon.svg", alt: "Email", href: "mailto:andynilessim05@gmail.com" },
       { src: "/assets/linkedin_icon.svg", alt: "LinkedIn", href: "#" },
       { src: "/assets/telegram_icon.svg", alt: "Telegram", href: "#" },
     ],

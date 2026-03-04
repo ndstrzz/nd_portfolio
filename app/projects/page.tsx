@@ -451,7 +451,7 @@ const VIDEO_DIM = { w: 1380, h: 920 };
 // ✅ Video source per folder (you can add ideun/chingu later)
 const VIDEO_BY_FOLDER: Record<FolderKey, string> = {
   ocbc: "/assets/folder/ocbc/ideun_video.mp4",
-  taedal: "/assets/folder/taedal/taedal_video.mp4",
+  taedal: "/assets/folder/taedal/taedal_video.mov",
   ideun: "/assets/folder/ideun/ideun_video.mp4",
   chingu: "/assets/folder/ideun/ideun_video.mp4", // placeholder for now
 };
@@ -774,7 +774,7 @@ export default function ProjectsPage() {
 
   const iconItems = useMemo(
     () => [
-      { src: "/assets/email_icon.svg", alt: "Email", href: "mailto:you@example.com" },
+      { src: "/assets/email_icon.svg", alt: "Email", href: "mailto:andynilessim05@gmail.com" },
       { src: "/assets/linkedin_icon.svg", alt: "LinkedIn", href: "#" },
       { src: "/assets/telegram_icon.svg", alt: "Telegram", href: "#" },
     ],
