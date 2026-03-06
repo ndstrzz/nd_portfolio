@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+public/assets/ocbc_deck/find_out_more/Frame 55.svg

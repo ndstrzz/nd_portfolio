@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import OcbcFindOutMoreFrame from "./_components/OcbcFindOutMoreFrame";
 
 declare global {
   namespace JSX {
@@ -15,6 +16,8 @@ declare global {
 export {};
 
 type Size = { w: number; h: number };
+type Rect = { x: number; y: number; w: number; h: number };
+
 const DESIGN: Size = { w: 1920, h: 1080 };
 
 // ✅ Move everything (icon + title + decks) up by this amount
@@ -56,13 +59,23 @@ const DECK_POS = {
   aitX: 258,
 };
 
-// Overlay target size for expanded Taedal
-const TAEDAL_EXPANDED = { w: 454, h: 711.44 };
+// Overlay target size for expanded deck
+const DECK_EXPANDED = { w: 454, h: 711.44 };
 
-// Dock-left position (in DESIGN coordinates)
-const TAEDAL_DOCK = {
-  x: 180, // aligns nicely with your left-side rhythm
-  y: 220, // visually comfortable under nav
+// Default dock-left position (before "find out more")
+const DECK_DOCK = {
+  x: 180,
+  y: 220,
+  gap: 44,
+};
+
+/**
+ * ✅ FINAL DOCK POSITION FOR OCBC after "Find out more"
+ * Change these numbers anytime to shift the OCBC deck further left/right/up/down.
+ */
+const OCBC_FINAL_DOCK = {
+  x: -380, // 👈 more negative = more left
+  y: 220,
   gap: 44,
 };
 
@@ -210,57 +223,68 @@ function ClickableAsset({
   );
 }
 
-/**
- * TaedalOverlay (two-step animation)
- * Step A: from deck -> center + expand to 454x711.44
- * Step B: slide left + show right-side "inside" panel
- */
-function TaedalOverlay({
+type DeckConfig = {
+  id: string;
+  src: string;
+  alt: string;
+  rect: Rect;
+  videoSrc?: string;
+  youtubeEmbedSrc?: string;
+  findOutMoreBtnSrc?: string;
+};
+
+function DeckOverlay({
   scale,
+  deck,
   onClose,
 }: {
   scale: number;
+  deck: DeckConfig;
   onClose: () => void;
 }) {
-  // Phase controls what the animated card's target is
-  // "from" -> "center" -> "dock"
   const [phase, setPhase] = useState<"from" | "center" | "dock">("from");
   const [showPanel, setShowPanel] = useState(false);
 
-  // Use the same paddingTop you used for scrolling content so coordinates match
+  // ✅ OCBC "find out more" state
+  const [ocbcDetailOpen, setOcbcDetailOpen] = useState(false);
+
   const CONTENT_PAD_TOP = 140;
 
-  // Starting position (where the deck is in your DESIGN coordinates)
-  const fromRect = {
-    x: DECK.x1,
-    y: DECK.y1 + CONTENT_DY + CONTENT_PAD_TOP,
-    w: DECK.w,
-    h: DECK.h,
+  const fromRect: Rect = {
+    x: deck.rect.x,
+    y: deck.rect.y + CONTENT_DY + CONTENT_PAD_TOP,
+    w: deck.rect.w,
+    h: deck.rect.h,
   };
 
-  // Center target
-  const centerRect = {
-    x: (DESIGN.w - TAEDAL_EXPANDED.w) / 2,
-    y: (DESIGN.h - TAEDAL_EXPANDED.h) / 2 + 40, // slight down so it feels like "drops in"
-    w: TAEDAL_EXPANDED.w,
-    h: TAEDAL_EXPANDED.h,
+  const centerRect: Rect = {
+    x: (DESIGN.w - DECK_EXPANDED.w) / 2,
+    y: (DESIGN.h - DECK_EXPANDED.h) / 2 + 40,
+    w: DECK_EXPANDED.w,
+    h: DECK_EXPANDED.h,
   };
 
-  // Dock-left target
-  const dockRect = {
-    x: TAEDAL_DOCK.x,
-    y: TAEDAL_DOCK.y + CONTENT_PAD_TOP,
-    w: TAEDAL_EXPANDED.w,
-    h: TAEDAL_EXPANDED.h,
+  const dockRectDefault: Rect = {
+    x: DECK_DOCK.x,
+    y: DECK_DOCK.y + CONTENT_PAD_TOP,
+    w: DECK_EXPANDED.w,
+    h: DECK_EXPANDED.h,
   };
 
-  // Drive the 2-step animation
+  const dockRectOcbcFinal: Rect = {
+    x: OCBC_FINAL_DOCK.x,
+    y: OCBC_FINAL_DOCK.y + CONTENT_PAD_TOP,
+    w: DECK_EXPANDED.w,
+    h: DECK_EXPANDED.h,
+  };
+
+  const dockRect = deck.id === "ocbc" && ocbcDetailOpen ? dockRectOcbcFinal : dockRectDefault;
+
   useEffect(() => {
     const t1 = window.setTimeout(() => setPhase("center"), 40);
     return () => window.clearTimeout(t1);
   }, []);
 
-  // ESC to close
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -269,8 +293,15 @@ function TaedalOverlay({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const rect =
-    phase === "from" ? fromRect : phase === "center" ? centerRect : dockRect;
+  const rect = phase === "from" ? fromRect : phase === "center" ? centerRect : dockRect;
+  const rightPanelX = dockRect.x + dockRect.w + DECK_DOCK.gap;
+
+  const closeAll = () => {
+    setOcbcDetailOpen(false);
+    onClose();
+  };
+
+  const showRightPanel = !(deck.id === "ocbc" && ocbcDetailOpen);
 
   return (
     <div
@@ -278,19 +309,18 @@ function TaedalOverlay({
         position: "fixed",
         inset: 0,
         zIndex: 50,
-        animation: "taedalOverlayIn 220ms ease-out both",
+        animation: "deckOverlayIn 220ms ease-out both",
       }}
     >
       <style>{`
-        @keyframes taedalOverlayIn {
+        @keyframes deckOverlayIn {
           from { opacity: 0; transform: translateY(-10px); }
           to   { opacity: 1; transform: translateY(0px); }
         }
       `}</style>
 
-      {/* Backdrop */}
       <div
-        onClick={onClose}
+        onClick={closeAll}
         style={{
           position: "absolute",
           inset: 0,
@@ -300,7 +330,6 @@ function TaedalOverlay({
         }}
       />
 
-      {/* Scaled stage layer (matches your layout scale) */}
       <div
         style={{
           position: "absolute",
@@ -313,7 +342,29 @@ function TaedalOverlay({
           pointerEvents: "none",
         }}
       >
-        {/* Animated deck card */}
+        {/* ✅ IMPORTANT: The frame is NOT mounted unless ocbcDetailOpen === true */}
+        {deck.id === "ocbc" && ocbcDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: dockRect.y + 20,
+              width: DESIGN.w,
+              height: 1400,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <OcbcFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setOcbcDetailOpen(false)}
+            />
+          </div>
+        ) : null}
+
+        {/* Deck card (always above everything) */}
         <div
           style={{
             position: "absolute",
@@ -324,33 +375,26 @@ function TaedalOverlay({
             pointerEvents: "auto",
             borderRadius: 18,
             overflow: "hidden",
+            zIndex: 2,
             transition:
               "left 520ms cubic-bezier(.2,.9,.2,1), top 520ms cubic-bezier(.2,.9,.2,1), width 520ms cubic-bezier(.2,.9,.2,1), height 520ms cubic-bezier(.2,.9,.2,1), box-shadow 520ms ease",
             boxShadow:
-              phase === "from"
-                ? "0 0 0 rgba(0,0,0,0)"
-                : "0 28px 80px rgba(0,0,0,0.55)",
+              phase === "from" ? "0 0 0 rgba(0,0,0,0)" : "0 28px 80px rgba(0,0,0,0.55)",
           }}
           onClick={(e) => e.stopPropagation()}
           onTransitionEnd={(e) => {
             if (e.propertyName !== "left" && e.propertyName !== "width") return;
-
             if (phase === "center") {
               setPhase("dock");
               window.setTimeout(() => setShowPanel(true), 140);
             }
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(255,255,255,0.02)",
-            }}
-          />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.02)" }} />
+
           <Image
-            src="/assets/taedal_deck.svg"
-            alt="Taedal deck expanded"
+            src={deck.src}
+            alt={`${deck.alt} expanded`}
             width={Math.round(rect.w)}
             height={Math.round(rect.h)}
             priority
@@ -362,11 +406,10 @@ function TaedalOverlay({
             }}
           />
 
-          {/* Close button */}
           <button
             type="button"
-            onClick={onClose}
-            aria-label="Close Taedal popup"
+            onClick={closeAll}
+            aria-label="Close popup"
             style={{
               position: "absolute",
               right: 14,
@@ -388,89 +431,126 @@ function TaedalOverlay({
           </button>
         </div>
 
-        {/* Right-side "inside" panel */}
-        <div
-          style={{
-            position: "absolute",
-            left: dockRect.x + dockRect.w + TAEDAL_DOCK.gap,
-            top: dockRect.y,
-            width: 900,
-            height: dockRect.h,
-            pointerEvents: "auto",
-            opacity: showPanel ? 1 : 0,
-            transform: showPanel ? "translateX(0px)" : "translateX(14px)",
-            transition: "opacity 360ms ease, transform 360ms ease",
-            borderRadius: 20,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(0,0,0,0.30)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            boxShadow: "0 24px 70px rgba(0,0,0,0.35)",
-            overflow: "hidden",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* ✅ Video + Find out more button */}
+        {/* Right-side panel (removed entirely when OCBC detail open) */}
+        {showRightPanel && (
           <div
             style={{
               position: "absolute",
-              inset: 0,
-              padding: 24,
-              display: "flex",
-              flexDirection: "column",
-              gap: 18,
+              left: rightPanelX,
+              top: dockRect.y,
+              width: 900,
+              height: dockRect.h,
+              pointerEvents: "auto",
+              opacity: showPanel ? 1 : 0,
+              transform: showPanel ? "translateX(0px)" : "translateX(14px)",
+              transition: "opacity 360ms ease, transform 360ms ease",
+              borderRadius: 20,
+              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(0,0,0,0.30)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.35)",
+              overflow: "hidden",
+              zIndex: 2,
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <div
               style={{
-                flex: 1,
-                borderRadius: 18,
-                overflow: "hidden",
-                border: "1px solid rgba(255,255,255,0.10)",
-                background: "rgba(255,255,255,0.03)",
+                position: "absolute",
+                inset: 0,
+                padding: 24,
+                display: "flex",
+                flexDirection: "column",
+                gap: 18,
               }}
             >
-              <video
-                src="/assets/taedal-deck/taedal_video.mp4"
-                controls
-                playsInline
-                preload="metadata"
+              <div
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
+                  flex: 1,
+                  borderRadius: 18,
+                  overflow: "hidden",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  background: "rgba(255,255,255,0.03)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-              />
-            </div>
+              >
+                {deck.youtubeEmbedSrc ? (
+                  <iframe
+                    src={deck.youtubeEmbedSrc}
+                    title={`${deck.alt} video`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                      display: "block",
+                    }}
+                  />
+                ) : deck.videoSrc ? (
+                  <video
+                    src={deck.videoSrc}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      color: "rgba(255,255,255,0.75)",
+                      fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial",
+                      fontSize: 18,
+                      letterSpacing: 0.2,
+                    }}
+                  >
+                    Coming soon
+                  </div>
+                )}
+              </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                // You can change this later to route to a Taedal detail page
-                // window.location.href = "/projects/taedal";
-              }}
-              aria-label="Find out more"
-              style={{
-                width: "fit-content",
-                background: "transparent",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                alignSelf: "flex-start",
-              }}
-            >
-              <Image
-                src="/assets/taedal-deck/find_out_more.svg"
-                alt="Find out more"
-                width={220}
-                height={56}
-                priority
-                style={{ width: 220, height: "auto", objectFit: "contain" }}
-              />
-            </button>
+              {deck.findOutMoreBtnSrc ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (deck.id === "ocbc") {
+                      setOcbcDetailOpen(true);
+                      if (phase !== "dock") setPhase("dock");
+                    }
+                  }}
+                  aria-label="Find out more"
+                  style={{
+                    width: "fit-content",
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                    cursor: deck.id === "ocbc" ? "pointer" : "default",
+                    alignSelf: "flex-start",
+                    opacity: deck.id === "ocbc" ? 1 : 0.6,
+                  }}
+                >
+                  <Image
+                    src={deck.findOutMoreBtnSrc}
+                    alt="Find out more"
+                    width={220}
+                    height={56}
+                    priority
+                    style={{ width: 220, height: "auto", objectFit: "contain" }}
+                  />
+                </button>
+              ) : null}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -478,7 +558,7 @@ function TaedalOverlay({
 
 export default function ExperiencePage() {
   const { stageRef, scale } = useFitScale(DESIGN);
-  const [taedalOpen, setTaedalOpen] = useState(false);
+  const [activeDeck, setActiveDeck] = useState<DeckConfig | null>(null);
 
   useEffect(() => {
     const id = "model-viewer-script";
@@ -510,6 +590,60 @@ export default function ExperiencePage() {
     []
   );
 
+  const decks: DeckConfig[] = useMemo(
+    () => [
+      {
+        id: "taedal",
+        src: "/assets/taedal_deck.svg",
+        alt: "Taedal deck",
+        rect: { x: DECK.x1, y: DECK.y1, w: DECK.w, h: DECK.h },
+        youtubeEmbedSrc:
+          "https://www.youtube.com/embed/K6o_OwgvwIw?si=1bQLvUohS6U0iusN",
+        findOutMoreBtnSrc: "/assets/find_out_more.svg",
+      },
+      {
+        id: "ocbc",
+        src: "/assets/ocbc_deck.svg",
+        alt: "OCBC deck",
+        rect: { x: DECK.x2, y: DECK.y1, w: DECK.w, h: DECK.h },
+        youtubeEmbedSrc:
+          "https://www.youtube.com/embed/TRokrwZoiW4?si=1QbKA3uiE-mn6Qh1",
+        findOutMoreBtnSrc: "/assets/find_out_more.svg",
+      },
+      {
+        id: "aucto",
+        src: "/assets/aucto_deck.svg",
+        alt: "Aucto deck",
+        rect: { x: DECK.x3, y: DECK.y1, w: DECK.w, h: DECK.h },
+      },
+      {
+        id: "uniqlo",
+        src: "/assets/uniqlo_deck.svg",
+        alt: "Uniqlo deck",
+        rect: { x: DECK_POS.uniqloX, y: DECK.y1, w: DECK.w, h: DECK.h },
+        youtubeEmbedSrc:
+          "https://www.youtube.com/embed/HgJPtRzLF_0?si=ktpEvpNJVY6rbWY5",
+        findOutMoreBtnSrc: "/assets/find_out_more.svg",
+      },
+      {
+        id: "ait",
+        src: "/assets/ait_deck.svg",
+        alt: "AIT deck",
+        rect: { x: DECK_POS.aitX, y: DECK_POS.row2Y, w: DECK.w, h: DECK.h },
+      },
+      {
+        id: "activ",
+        src: "/assets/activ_deck.svg",
+        alt: "Activ deck",
+        rect: { x: DECK.x2, y: DECK_POS.row2Y, w: DECK.w, h: DECK.h },
+        youtubeEmbedSrc:
+          "https://www.youtube.com/embed/HgJPtRzLF_0?si=ktpEvpNJVY6rbWY5",
+        findOutMoreBtnSrc: "/assets/find_out_more.svg",
+      },
+    ],
+    []
+  );
+
   return (
     <main
       ref={stageRef}
@@ -524,8 +658,9 @@ export default function ExperiencePage() {
         position: "relative",
       }}
     >
-      {/* Overlay (popup) */}
-      {taedalOpen && <TaedalOverlay scale={scale} onClose={() => setTaedalOpen(false)} />}
+      {activeDeck && (
+        <DeckOverlay scale={scale} deck={activeDeck} onClose={() => setActiveDeck(null)} />
+      )}
 
       <div style={{ position: "relative", minHeight: "140vh" }}>
         {/* Fixed background */}
@@ -572,7 +707,7 @@ export default function ExperiencePage() {
             transformOrigin: "top center",
             width: DESIGN.w,
             height: NAV_GLASS.height,
-            zIndex: 10,
+            zIndex: 80,
             pointerEvents: "none",
           }}
         >
@@ -687,65 +822,19 @@ export default function ExperiencePage() {
                 priority
               />
 
-              {/* Row 1 */}
-              <ClickableAsset
-                src="/assets/taedal_deck.svg"
-                alt="Taedal deck"
-                x={DECK.x1}
-                y={DECK.y1 + CONTENT_DY}
-                w={DECK.w}
-                h={DECK.h}
-                priority
-                onClick={() => setTaedalOpen(true)}
-              />
-
-              <Asset
-                src="/assets/ocbc_deck.svg"
-                alt="OCBC deck"
-                x={DECK.x2}
-                y={DECK.y1 + CONTENT_DY}
-                w={DECK.w}
-                h={DECK.h}
-                priority
-              />
-              <Asset
-                src="/assets/aucto_deck.svg"
-                alt="Aucto deck"
-                x={DECK.x3}
-                y={DECK.y1 + CONTENT_DY}
-                w={DECK.w}
-                h={DECK.h}
-                priority
-              />
-              <Asset
-                src="/assets/uniqlo_deck.svg"
-                alt="Uniqlo deck"
-                x={DECK_POS.uniqloX}
-                y={DECK.y1 + CONTENT_DY}
-                w={DECK.w}
-                h={DECK.h}
-                priority
-              />
-
-              {/* Row 2 */}
-              <Asset
-                src="/assets/ait_deck.svg"
-                alt="AIT deck"
-                x={DECK_POS.aitX}
-                y={DECK_POS.row2Y + CONTENT_DY}
-                w={DECK.w}
-                h={DECK.h}
-                priority
-              />
-              <Asset
-                src="/assets/activ_deck.svg"
-                alt="Activ deck"
-                x={DECK.x2}
-                y={DECK_POS.row2Y + CONTENT_DY}
-                w={DECK.w}
-                h={DECK.h}
-                priority
-              />
+              {decks.map((d) => (
+                <ClickableAsset
+                  key={d.id}
+                  src={d.src}
+                  alt={d.alt}
+                  x={d.rect.x}
+                  y={d.rect.y + CONTENT_DY}
+                  w={d.rect.w}
+                  h={d.rect.h}
+                  priority={d.id === "taedal"}
+                  onClick={() => setActiveDeck(d)}
+                />
+              ))}
             </div>
           </div>
         </div>

@@ -229,7 +229,7 @@ export default function Page() {
           </div>
 
           {/* FRONT LAYER */}
-          <div style={{ position: "absolute", inset: 0, zIndex: 2 }}>
+          <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
             <Asset
               src="/assets/ND_Logo.svg"
               alt="ND Logo"

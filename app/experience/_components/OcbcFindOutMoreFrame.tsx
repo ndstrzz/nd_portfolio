@@ -1,0 +1,757 @@
+// C:\Users\User\Downloads\andy_portfolio\app\experience\_components\OcbcFindOutMoreFrame.tsx
+"use client";
+
+import Image from "next/image";
+import React, { useMemo, useState } from "react";
+
+type Rect = { x: number; y: number; w: number; h: number };
+
+type LinkHotspot = Rect & {
+  href: string;
+  ariaLabel?: string;
+};
+
+type EventBlock = {
+  key: string;
+  title: Rect & { src: string; alt: string };
+  chunk: Rect & { src: string; alt: string };
+  links?: LinkHotspot[];
+};
+
+// ✅ Fixed width, dynamic height per term
+const FRAME_W = 1920;
+const FRAME_H_TERM1 = 30800;
+const FRAME_H_TERM2 = 36680;
+
+// ✅ Shift the whole frame UP by this amount (edit anytime)
+const FRAME_SHIFT_Y = -300;
+
+// Introduction.svg placement
+const INTRO = {
+  x: 157,
+  y: 205,
+  w: 1606,
+  h: 669,
+  src: "/assets/ocbc_deck/find_out_more/introduction.svg",
+};
+
+// Term buttons
+const TERM_BTN = {
+  y: 900,
+  w: 330,
+  h: 58,
+  x1: 270,
+  gap: 23,
+  x2ShiftLeft: 14,
+};
+const TERM_X2_BASE = TERM_BTN.x1 + TERM_BTN.w + TERM_BTN.gap;
+const TERM_X2 = TERM_X2_BASE - TERM_BTN.x2ShiftLeft;
+
+const TERM_ASSETS = {
+  first: {
+    active: "/assets/ocbc_deck/find_out_more/first_term%20activated.svg",
+    inactive: "/assets/ocbc_deck/find_out_more/first_term_deactivated.svg",
+  },
+  second: {
+    active: "/assets/ocbc_deck/find_out_more/second_term_activated.svg",
+    inactive: "/assets/ocbc_deck/find_out_more/second_term_deactivated.svg",
+  },
+};
+
+/**
+ * ✅ TERM GROUP ORIGINS (ABSOLUTE)
+ */
+const TERM1_ORIGIN = { x: 230, y: 980 };
+const TERM2_ORIGIN = { x: 230, y: 980 };
+
+/** Convert a group-relative rect into an absolute rect on the full canvas */
+function absRect(origin: { x: number; y: number }, r: Rect): Rect {
+  return { x: origin.x + r.x, y: origin.y + r.y, w: r.w, h: r.h };
+}
+
+/**
+ * ✅ TERM LINES (CODE-BASED, SHINING)
+ * - These sit BEHIND event_with_logo (titles), so keep zIndex lower than title.
+ * - You have full control of x/y/height/thickness per term.
+ */
+const TERM1_DIVIDER = {
+  x: 264.9,
+  y: 1009,
+  h: 27977,
+  thickness: 8,
+  baseColor: "rgba(255,255,255,0.55)",
+  glowColor: "rgba(255,255,255,0.95)",
+};
+
+const TERM2_DIVIDER = {
+  x: 264.9,
+  y: 1009,
+  h: 33647,
+  thickness: 8,
+  baseColor: "rgba(255,255,255,0.55)",
+  glowColor: "rgba(255,255,255,0.95)",
+};
+
+/**
+ * ✅ FOOTER (YOU HAVE FULL CONTROL HERE)
+ */
+const FOOTER_SRC = "/assets/ocbc_deck/find_out_more/footer.svg";
+const FOOTER_ALT = "Footer";
+
+// Term 1 footer (edit x/y/w/h freely)
+const FOOTER_TERM1: Rect = {
+  x: 0,
+  y: 28000,
+  w: 1916.01,
+  h: 992,
+};
+
+// Term 2 footer (edit x/y/w/h freely)
+const FOOTER_TERM2: Rect = {
+  x: 0,
+  y: 33800,
+  w: 1916.01,
+  h: 992,
+};
+
+/**
+ * ✅ TERM 1 EVENTS
+ */
+const TERM1_EVENTS: EventBlock[] = [
+  {
+    key: "red_conference",
+    title: {
+      ...absRect(TERM1_ORIGIN, { x: 0, y: 0, w: 594, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/red_conference_with_logo.svg",
+      alt: "The OCBC RED Conference (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM1_ORIGIN, { x: 90.4, y: 115, w: 1328, h: 1571.52 }),
+      src: "/assets/ocbc_deck/find_out_more/red_conference_chunk.svg",
+      alt: "OCBC RED Conference content",
+    },
+    links: [
+      {
+        x: 0,
+        y: 735,
+        w: 689,
+        h: 28,
+        href: "https://www.youtube.com/watch?si=9xuGdkKatqZPWzUq&v=KAxDgDfIajs&feature=youtu.be",
+        ariaLabel: "Watch the RED Conference video",
+      },
+    ],
+  },
+  {
+    key: "wall_decal",
+    title: {
+      ...absRect(TERM1_ORIGIN, { x: 0, y: 1761.52, w: 436, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/wall_decal_design_with_logo.svg",
+      alt: "Wall Decal Design (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM1_ORIGIN, { x: 90.42, y: 1876, w: 1329, h: 7901.71 }),
+      src: "/assets/ocbc_deck/find_out_more/wall_decal_chunk.svg",
+      alt: "Wall Decal Design content",
+    },
+  },
+  {
+    key: "avatar_background_design",
+    title: {
+      ...absRect(TERM1_ORIGIN, { x: 0, y: 9852.71, w: 597, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/avatar_background_design_with_logo.svg",
+      alt: "Avatar Background Design (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM1_ORIGIN, { x: 90, y: 9967.55, w: 1293, h: 1720.43 }),
+      src: "/assets/ocbc_deck/find_out_more/avatar_background_design_chunk.svg",
+      alt: "Avatar Background Design content",
+    },
+  },
+  {
+    key: "edm_tv_signages",
+    title: {
+      ...absRect(TERM1_ORIGIN, { x: 0, y: 11762.98, w: 907, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/electronic_direct_mail_TV_Signage_with_logo.svg",
+      alt: "Electronic Direct Mail (EDM) on TV Signages (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM1_ORIGIN, { x: 90, y: 11877.82, w: 1327.58, h: 1523 }),
+      src: "/assets/ocbc_deck/find_out_more/electronic_direct_mail_TV_Signage_chunk.svg",
+      alt: "Electronic Direct Mail (EDM) on TV Signages content",
+    },
+  },
+  {
+    key: "edm_comm_productivity",
+    title: {
+      ...absRect(TERM1_ORIGIN, { x: 0, y: 13475.82, w: 994, h: 104 }),
+      src: "/assets/ocbc_deck/find_out_more/electronic_direct_mail_with_logo.svg",
+      alt: "Electronic Direct Mail (EDM) on Communication and Productivity (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM1_ORIGIN, { x: 90.42, y: 13625, w: 1327, h: 1724.39 }),
+      src: "/assets/ocbc_deck/find_out_more/electronic_direct_mail_chunk.svg",
+      alt: "Electronic Direct Mail (EDM) on Communication and Productivity content",
+    },
+  },
+  {
+    key: "getting_featured_ocbc",
+    title: {
+      ...absRect(TERM1_ORIGIN, { x: 0, y: 15514.23, w: 994, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/getting_featured_OCBC_with_logo.svg",
+      alt: "Getting featured on the OCBC website (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM1_ORIGIN, { x: 96.42, y: 15629.07, w: 1321, h: 11216 }),
+      src: "/assets/ocbc_deck/find_out_more/getting_featured_OCBC_chunk.svg",
+      alt: "Getting featured on the OCBC website content",
+    },
+  },
+];
+
+/**
+ * ✅ TERM 2 EVENTS
+ */
+const TERM2_EVENTS: EventBlock[] = [
+  {
+    key: "nft_selft_mint_automation",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 0, w: 1093.42, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/nft_selft_mint_automation_with_logo.svg",
+      alt: "NFT Self Mint Automation Workflow (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 80, y: 127, w: 1326.49, h: 3045 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/nft_selft_mint_automation_chunk.svg",
+      alt: "NFT Self Mint Automation Workflow content",
+    },
+  },
+  {
+    key: "deal_or_no_deal_summer",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 3337, w: 1144, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/deal_or_no_deal_with_logo.svg",
+      alt: "Deal Or No Deal (DOND) - Summer Cohort Event Support (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 110, y: 3451, w: 1377.42, h: 1689 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/deal_or_no_deal_chunk.svg",
+      alt: "Deal Or No Deal (DOND) - Summer Cohort Event Support content",
+    },
+  },
+  {
+    key: "food_explorer_features",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 5215, w: 1139, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/food_explorer_features_with_logo.svg",
+      alt: "Food Explorer Feature Proposal (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 115, y: 5288, w: 1328, h: 1262 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/food_explorer_features_chunk.svg",
+      alt: "Food Explorer Feature Proposal content",
+    },
+  },
+  {
+    key: "ocbc_ignite_internship",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 6625, w: 1051, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/ocbc_ignite_internship_with_logo.svg",
+      alt: "OCBC Ignite Internship Sharing (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 90.39, y: 6758.42, w: 1328, h: 3308.58 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/ocbc_ignite_internship_chunk.svg",
+      alt: "OCBC Ignite Internship Sharing content",
+    },
+  },
+  {
+    key: "goat_connect",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 10142, w: 967, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/GO%26T_connect_with_logo.svg",
+      alt: "GO&T Connect Mascot Design (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 90.42, y: 10249, w: 1411.58, h: 3592 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/GO%26T_connect_chunk.svg",
+      alt: "GO&T Connect Mascot Design content",
+    },
+  },
+  {
+    key: "ignite_2025",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 13977, w: 1199, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/ignite_2025_with_logo.svg",
+      alt: "Ignite 2025 Hackathon Promotional Video — Video Director (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 90.39, y: 14092, w: 1380.61, h: 3777 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/ignite_2025_chunk.svg",
+      alt: "Ignite 2025 Hackathon Promotional Video content",
+    },
+  },
+  {
+    key: "deal_or_no_deal_winter",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 17944, w: 1114, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/deal_or_no_deal_winter_with_logo.svg",
+      alt: "Deal Or No Deal (DOND) - Winter Cohort Event Support (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 90, y: 18063, w: 1215, h: 1220 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/deal_or_no_deal_winter_chunk.svg",
+      alt: "Deal Or No Deal (DOND) - Winter Cohort Event Support content",
+    },
+  },
+  {
+    key: "christmas_2025",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 19358, w: 874, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/christmas_2025_with_logo.svg",
+      alt: "Christmas 2025 TV Signage (3D Concept) (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 88, y: 19453, w: 1439, h: 2530 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/christmas_2025_chunk.svg",
+      alt: "Christmas 2025 TV Signage (3D Concept) content",
+    },
+  },
+  {
+    key: "designing_concept_kids_avatar",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 22100, w: 750.42, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/designing_concept_with_logo.svg",
+      alt: "Designing Concept for Kid's Avatar (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 88, y: 22195, w: 1378.42, h: 3316 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/designing_concept_chunk.svg",
+      alt: "Designing Concept for Kid's Avatar content",
+    },
+  },
+  {
+    key: "beautifying_department",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 25604, w: 1443.42, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/beautifying_department_with_logo.svg",
+      alt: "Beautifying the Department's Project Plan Showcase (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 88, y: 25704, w: 1322, h: 1301 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/beautifying_department_chunk.svg",
+      alt: "Beautifying the Department's Project Plan Showcase content",
+    },
+  },
+  {
+    key: "getting_featured_term2",
+    title: {
+      ...absRect(TERM2_ORIGIN, { x: 0, y: 27111, w: 816.42, h: 69.84 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/getting_featured_with_logo.svg",
+      alt: "Getting featured on the OCBC website (with logo)",
+    },
+    chunk: {
+      ...absRect(TERM2_ORIGIN, { x: 88, y: 27210, w: 1420, h: 5493.3 }),
+      src: "/assets/ocbc_deck/find_out_more/term_2/getting_featured_chunk.svg",
+      alt: "Getting featured on the OCBC website content",
+    },
+  },
+];
+
+function AbsImage({
+  rect,
+  priority,
+  zIndex,
+}: {
+  rect: Rect & { src: string; alt: string };
+  priority?: boolean;
+  zIndex?: number;
+}) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: rect.x,
+        top: rect.y,
+        width: rect.w,
+        height: rect.h,
+        zIndex: zIndex ?? "auto",
+        pointerEvents: "auto",
+      }}
+    >
+      <Image
+        src={rect.src}
+        alt={rect.alt}
+        width={Math.max(1, Math.round(rect.w))}
+        height={Math.max(1, Math.round(rect.h))}
+        priority={priority}
+        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+      />
+    </div>
+  );
+}
+
+/**
+ * ✅ Shining vertical line:
+ * - Base line is dim white
+ * - A bright "spark" travels down the line in a loop
+ * - Still sits BEHIND titles (zIndex default = 2)
+ */
+function ShiningLine({
+  x,
+  y,
+  h,
+  thickness = 4,
+  baseColor = "rgba(255,255,255,0.55)",
+  glowColor = "rgba(255,255,255,0.95)",
+  zIndex = 2,
+  // freedom knobs
+  sparkleSize = 1220, // height of the travelling highlight
+  durationMs = 200000, // speed
+  blurPx = 20, // glow softness
+}: {
+  x: number;
+  y: number;
+  h: number;
+  thickness?: number;
+  baseColor?: string;
+  glowColor?: string;
+  zIndex?: number;
+  sparkleSize?: number;
+  durationMs?: number;
+  blurPx?: number;
+}) {
+  return (
+    <>
+      {/* local styles for this component (safe in Next client component) */}
+      <style>{`
+        @keyframes ocbc-line-spark {
+          0%   { transform: translateY(-${sparkleSize}px); opacity: 0; }
+          8%   { opacity: 1; }
+          50%  { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateY(${h + sparkleSize}px); opacity: 0; }
+        }
+      `}</style>
+
+      <div
+        style={{
+          position: "absolute",
+          left: x,
+          top: y,
+          width: thickness,
+          height: h,
+          zIndex,
+          pointerEvents: "none",
+        }}
+      >
+        {/* Base line */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: baseColor,
+            borderRadius: 999,
+          }}
+        />
+
+        {/* Soft outer glow for the whole line */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: baseColor,
+            filter: `blur(${Math.max(2, Math.round(blurPx / 2))}px)`,
+            opacity: 0.55,
+            borderRadius: 999,
+          }}
+        />
+
+        {/* Travelling sparkle */}
+        <div
+          style={{
+            position: "absolute",
+            left: -Math.max(6, thickness * 2), // let glow extend sideways
+            width: thickness + Math.max(12, thickness * 4),
+            height: sparkleSize,
+            background: `linear-gradient(to bottom,
+              rgba(255,255,255,0) 0%,
+              ${glowColor} 45%,
+              rgba(255,255,255,0) 100%
+            )`,
+            filter: `blur(${blurPx}px)`,
+            opacity: 0.9,
+            animation: `ocbc-line-spark ${durationMs}ms linear infinite`,
+          }}
+        />
+
+        {/* Crisp core sparkle */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            width: thickness,
+            height: sparkleSize,
+            background: `linear-gradient(to bottom,
+              rgba(255,255,255,0) 0%,
+              rgba(255,255,255,1) 45%,
+              rgba(255,255,255,0) 100%
+            )`,
+            opacity: 0.85,
+            animation: `ocbc-line-spark ${durationMs}ms linear infinite`,
+          }}
+        />
+      </div>
+    </>
+  );
+}
+
+export default function OcbcFindOutMoreFrame({
+  open,
+  topY,
+  onClose,
+}: {
+  open: boolean;
+  topY: number;
+  onClose: () => void;
+}) {
+  const [term, setTerm] = useState<"first" | "second">("first");
+
+  // ✅ dynamic frame height per term
+  const frameH = term === "first" ? FRAME_H_TERM1 : FRAME_H_TERM2;
+
+  const activeEvents = useMemo(() => {
+    return term === "first" ? TERM1_EVENTS : TERM2_EVENTS;
+  }, [term]);
+
+  // ✅ FOOTER RECT (direct, editable)
+  const footerRect: Rect & { src: string; alt: string } =
+    term === "first"
+      ? { ...FOOTER_TERM1, src: FOOTER_SRC, alt: FOOTER_ALT }
+      : { ...FOOTER_TERM2, src: FOOTER_SRC, alt: FOOTER_ALT };
+
+  // ✅ Line settings per term
+  const line = term === "first" ? TERM1_DIVIDER : TERM2_DIVIDER;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: 0,
+        top: topY + FRAME_SHIFT_Y,
+        width: FRAME_W,
+        height: "100vh",
+        pointerEvents: open ? "auto" : "none",
+        zIndex: 1,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Slide-up container */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          width: FRAME_W,
+          height: "100vh",
+          overflow: "visible",
+          borderRadius: 0,
+          background: "rgba(0,0,0,0.0)",
+          transform: open ? "translateY(0px)" : "translateY(100%)",
+          transition: "transform 520ms cubic-bezier(.2,.9,.2,1)",
+        }}
+      >
+        {/* Dim */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(0,0,0,0.35)",
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Scroll */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            overflowY: "auto",
+            overflowX: "visible",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: FRAME_W,
+              height: frameH,
+              background: "#000000",
+            }}
+          >
+            {/* Close */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close OCBC Find Out More"
+              style={{
+                position: "sticky",
+                top: 16,
+                marginLeft: FRAME_W - 16 - 44,
+                zIndex: 99999,
+                width: 44,
+                height: 44,
+                borderRadius: 14,
+                border: "1px solid rgba(255,255,255,0.14)",
+                background: "rgba(0,0,0,0.35)",
+                color: "white",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 18,
+                backdropFilter: "blur(10px)",
+                WebkitBackdropFilter: "blur(10px)",
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Introduction */}
+            <AbsImage
+              rect={{
+                x: INTRO.x,
+                y: INTRO.y,
+                w: INTRO.w,
+                h: INTRO.h,
+                src: INTRO.src,
+                alt: "OCBC introduction",
+              }}
+              priority
+              zIndex={5}
+            />
+
+            {/* Term buttons */}
+            <button
+              type="button"
+              onClick={() => setTerm("first")}
+              aria-label="First term"
+              style={{
+                position: "absolute",
+                left: TERM_BTN.x1,
+                top: TERM_BTN.y,
+                width: TERM_BTN.w,
+                height: TERM_BTN.h,
+                background: "transparent",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                zIndex: 10,
+              }}
+            >
+              <Image
+                src={term === "first" ? TERM_ASSETS.first.active : TERM_ASSETS.first.inactive}
+                alt="First term button"
+                width={TERM_BTN.w}
+                height={TERM_BTN.h}
+                priority
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTerm("second")}
+              aria-label="Second term"
+              style={{
+                position: "absolute",
+                left: TERM_X2,
+                top: TERM_BTN.y,
+                width: TERM_BTN.w,
+                height: TERM_BTN.h,
+                background: "transparent",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                zIndex: 10,
+              }}
+            >
+              <Image
+                src={term === "second" ? TERM_ASSETS.second.active : TERM_ASSETS.second.inactive}
+                alt="Second term button"
+                width={TERM_BTN.w}
+                height={TERM_BTN.h}
+                priority
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </button>
+
+            {/* ✅ SHINING TERM LINE (behind titles) */}
+            <ShiningLine
+              x={line.x}
+              y={line.y}
+              h={line.h}
+              thickness={line.thickness}
+              baseColor={line.baseColor}
+              glowColor={line.glowColor}
+              zIndex={2}
+              // tweakable knobs:
+              sparkleSize={220}
+              durationMs={2600}
+              blurPx={10}
+            />
+
+            {/* Active term events */}
+            {activeEvents.map((ev) => (
+              <React.Fragment key={ev.key}>
+                {/* Titles above the line */}
+                <AbsImage rect={ev.title} priority zIndex={5} />
+
+                <div
+                  style={{
+                    position: "absolute",
+                    left: ev.chunk.x,
+                    top: ev.chunk.y,
+                    width: ev.chunk.w,
+                    height: ev.chunk.h,
+                    zIndex: 3,
+                  }}
+                >
+                  <Image
+                    src={ev.chunk.src}
+                    alt={ev.chunk.alt}
+                    width={Math.max(1, Math.round(ev.chunk.w))}
+                    height={Math.max(1, Math.round(ev.chunk.h))}
+                    priority
+                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                  />
+
+                  {ev.links?.map((lnk, idx) => (
+                    <a
+                      key={`${ev.key}-lnk-${idx}`}
+                      href={lnk.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={lnk.ariaLabel ?? "Open link"}
+                      style={{
+                        position: "absolute",
+                        left: lnk.x,
+                        top: lnk.y,
+                        width: lnk.w,
+                        height: lnk.h,
+                        display: "block",
+                        cursor: "pointer",
+                      }}
+                    />
+                  ))}
+                </div>
+              </React.Fragment>
+            ))}
+
+            {/* ✅ FOOTER — ALWAYS ON TOP */}
+            <AbsImage rect={footerRect} priority zIndex={999999} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
