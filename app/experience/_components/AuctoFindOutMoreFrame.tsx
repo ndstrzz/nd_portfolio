@@ -58,8 +58,7 @@ const AUCTO_FIRST_PHOTOS: Rect & { src: string; alt: string } = {
   alt: "Aucto first photos",
 };
 
-// ✅ Using an in-frame corrected X so the image visually matches the screenshot.
-// The -691 value from Figma looks like it came from a nested group measurement.
+// ✅ Adjusted so it visually sits correctly in-frame
 const AUCTO_SECOND_PHOTOS: Rect & { src: string; alt: string } = {
   x: 380,
   y: 2185,
@@ -210,7 +209,7 @@ export default function AuctoFindOutMoreFrame({
                 position: "sticky",
                 top: 16,
                 marginLeft: FRAME_W - 16 - 44,
-                zIndex: 99999,
+                zIndex: 99999999,
                 width: 44,
                 height: 44,
                 borderRadius: 14,
@@ -235,7 +234,7 @@ export default function AuctoFindOutMoreFrame({
             <AbsImage rect={AUCTO_TASK_BLOCK} priority zIndex={5} />
             <AbsImage rect={AUCTO_FIRST_PHOTOS} priority zIndex={5} />
             <AbsImage rect={AUCTO_SECOND_PHOTOS} priority zIndex={5} />
-            <AbsImage rect={FOOTER_BLOCK} priority zIndex={999999} />
+            <AbsImage rect={FOOTER_BLOCK} priority zIndex={9999} />
           </div>
         </div>
 
@@ -247,7 +246,7 @@ export default function AuctoFindOutMoreFrame({
             position: "absolute",
             right: 28,
             bottom: 28,
-            zIndex: 100000,
+            zIndex: 2147483647,
             width: 58,
             height: 58,
             borderRadius: 999,

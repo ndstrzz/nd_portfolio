@@ -70,8 +70,6 @@ function absRect(origin: { x: number; y: number }, r: Rect): Rect {
 
 /**
  * ✅ TERM LINES (CODE-BASED, SHINING)
- * - These sit BEHIND event_with_logo (titles), so keep zIndex lower than title.
- * - You have full control of x/y/height/thickness per term.
  */
 const TERM1_DIVIDER = {
   x: 264.9,
@@ -92,7 +90,7 @@ const TERM2_DIVIDER = {
 };
 
 /**
- * ✅ FOOTER (YOU HAVE FULL CONTROL HERE)
+ * ✅ FOOTER
  */
 const FOOTER_SRC = "/assets/ocbc_deck/find_out_more/footer.svg";
 const FOOTER_ALT = "Footer";
@@ -673,7 +671,7 @@ export default function OcbcFindOutMoreFrame({
                 position: "sticky",
                 top: 16,
                 marginLeft: FRAME_W - 16 - 44,
-                zIndex: 99999,
+                zIndex: 99999999,
                 width: 44,
                 height: 44,
                 borderRadius: 14,
@@ -822,7 +820,7 @@ export default function OcbcFindOutMoreFrame({
               );
             })}
 
-            <AbsImage rect={footerRect} priority zIndex={999999} />
+            <AbsImage rect={footerRect} priority zIndex={9999} />
           </div>
         </div>
 
@@ -834,7 +832,7 @@ export default function OcbcFindOutMoreFrame({
             position: "absolute",
             right: 28,
             bottom: 28,
-            zIndex: 100000,
+            zIndex: 2147483647,
             width: 58,
             height: 58,
             borderRadius: 999,
