@@ -1,8 +1,7 @@
-// C:\Users\User\Downloads\andy_portfolio\app\experience\_components\OcbcFindOutMoreFrame.tsx
 "use client";
 
 import Image from "next/image";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type Rect = { x: number; y: number; w: number; h: number };
 
@@ -24,7 +23,7 @@ const FRAME_H_TERM1 = 30800;
 const FRAME_H_TERM2 = 36680;
 
 // ✅ Shift the whole frame UP by this amount (edit anytime)
-const FRAME_SHIFT_Y = -10;
+const FRAME_SHIFT_Y = 0;
 
 // Introduction.svg placement
 const INTRO = {
@@ -98,7 +97,7 @@ const TERM2_DIVIDER = {
 const FOOTER_SRC = "/assets/ocbc_deck/find_out_more/footer.svg";
 const FOOTER_ALT = "Footer";
 
-// Term 1 footer (edit x/y/w/h freely)
+// Term 1 footer
 const FOOTER_TERM1: Rect = {
   x: 0,
   y: 28000,
@@ -106,7 +105,7 @@ const FOOTER_TERM1: Rect = {
   h: 992,
 };
 
-// Term 2 footer (edit x/y/w/h freely)
+// Term 2 footer
 const FOOTER_TERM2: Rect = {
   x: 0,
   y: 33800,
@@ -390,12 +389,39 @@ function AbsImage({
   );
 }
 
-/**
- * ✅ Shining vertical line:
- * - Base line is dim white
- * - A bright "spark" travels down the line in a loop
- * - Still sits BEHIND titles (zIndex default = 2)
- */
+function RevealLayer({
+  rect,
+  visible,
+  zIndex,
+  children,
+  delayMs = 0,
+}: {
+  rect: Rect;
+  visible: boolean;
+  zIndex?: number;
+  children: React.ReactNode;
+  delayMs?: number;
+}) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: rect.x,
+        top: rect.y,
+        width: rect.w,
+        height: rect.h,
+        zIndex: zIndex ?? "auto",
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0px)" : "translateY(26px)",
+        transition: `opacity 420ms ease ${delayMs}ms, transform 420ms ease ${delayMs}ms`,
+        willChange: "opacity, transform",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function ShiningLine({
   x,
   y,
@@ -471,8 +497,8 @@ function ShiningLine({
             background: `linear-gradient(to bottom,
               rgba(255,255,255,0) 0%,
               ${glowColor} 45%,
-              rgba(255,255,255,0) 100%
-            )`,
+              rgba(255,255,255,0) 100%)
+            `,
             filter: `blur(${blurPx}px)`,
             opacity: 0.9,
             animation: `ocbc-line-spark ${durationMs}ms linear infinite`,
@@ -488,8 +514,8 @@ function ShiningLine({
             background: `linear-gradient(to bottom,
               rgba(255,255,255,0) 0%,
               rgba(255,255,255,1) 45%,
-              rgba(255,255,255,0) 100%
-            )`,
+              rgba(255,255,255,0) 100%)
+            `,
             opacity: 0.85,
             animation: `ocbc-line-spark ${durationMs}ms linear infinite`,
           }}
@@ -509,6 +535,12 @@ export default function OcbcFindOutMoreFrame({
   onClose: () => void;
 }) {
   const [term, setTerm] = useState<"first" | "second">("first");
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportH, setViewportH] = useState(0);
+  const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const frameH = term === "first" ? FRAME_H_TERM1 : FRAME_H_TERM2;
 
@@ -523,6 +555,57 @@ export default function OcbcFindOutMoreFrame({
 
   const line = term === "first" ? TERM1_DIVIDER : TERM2_DIVIDER;
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    el.scrollTo({ top: 0, behavior: "auto" });
+    setShowBackToTop(false);
+    setScrollTop(0);
+    setViewportH(el.clientHeight);
+    setRevealedIds(new Set());
+  }, [term, open]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onResize = () => setViewportH(el.clientHeight);
+    onResize();
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const triggerBottom = scrollTop + viewportH - 120;
+    if (triggerBottom <= 0) return;
+
+    setRevealedIds((prev) => {
+      const next = new Set(prev);
+
+      for (const ev of activeEvents) {
+        if (ev.title.y <= triggerBottom) next.add(`${ev.key}-title`);
+        if (ev.chunk.y <= triggerBottom) next.add(`${ev.key}-chunk`);
+      }
+
+      return next;
+    });
+  }, [scrollTop, viewportH, activeEvents]);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setScrollTop(el.scrollTop);
+    setShowBackToTop(el.scrollTop > 900);
+  };
+
+  const scrollToTop = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div
       style={{
@@ -533,6 +616,7 @@ export default function OcbcFindOutMoreFrame({
         height: "100%",
         pointerEvents: open ? "auto" : "none",
         zIndex: 1,
+        overflowX: "hidden",
       }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -560,12 +644,15 @@ export default function OcbcFindOutMoreFrame({
         />
 
         <div
+          ref={scrollRef}
+          onScroll={handleScroll}
           style={{
             position: "absolute",
             inset: 0,
             overflowY: "auto",
-            overflowX: "visible",
+            overflowX: "hidden",
             WebkitOverflowScrolling: "touch",
+            scrollBehavior: "smooth",
           }}
         >
           <div
@@ -575,6 +662,7 @@ export default function OcbcFindOutMoreFrame({
               minHeight: "100%",
               height: frameH,
               background: "#000000",
+              overflowX: "hidden",
             }}
           >
             <button
@@ -684,54 +772,102 @@ export default function OcbcFindOutMoreFrame({
               blurPx={10}
             />
 
-            {activeEvents.map((ev) => (
-              <React.Fragment key={ev.key}>
-                <AbsImage rect={ev.title} priority zIndex={5} />
+            {activeEvents.map((ev) => {
+              const titleVisible = revealedIds.has(`${ev.key}-title`);
+              const chunkVisible = revealedIds.has(`${ev.key}-chunk`);
 
-                <div
-                  style={{
-                    position: "absolute",
-                    left: ev.chunk.x,
-                    top: ev.chunk.y,
-                    width: ev.chunk.w,
-                    height: ev.chunk.h,
-                    zIndex: 3,
-                  }}
-                >
-                  <Image
-                    src={ev.chunk.src}
-                    alt={ev.chunk.alt}
-                    width={Math.max(1, Math.round(ev.chunk.w))}
-                    height={Math.max(1, Math.round(ev.chunk.h))}
-                    priority
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                  />
-
-                  {ev.links?.map((lnk, idx) => (
-                    <a
-                      key={`${ev.key}-lnk-${idx}`}
-                      href={lnk.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={lnk.ariaLabel ?? "Open link"}
-                      style={{
-                        position: "absolute",
-                        left: lnk.x,
-                        top: lnk.y,
-                        width: lnk.w,
-                        height: lnk.h,
-                        display: "block",
-                        cursor: "pointer",
-                      }}
+              return (
+                <React.Fragment key={ev.key}>
+                  <RevealLayer rect={ev.title} visible={titleVisible} zIndex={5}>
+                    <Image
+                      src={ev.title.src}
+                      alt={ev.title.alt}
+                      width={Math.max(1, Math.round(ev.title.w))}
+                      height={Math.max(1, Math.round(ev.title.h))}
+                      priority
+                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
                     />
-                  ))}
-                </div>
-              </React.Fragment>
-            ))}
+                  </RevealLayer>
+
+                  <RevealLayer rect={ev.chunk} visible={chunkVisible} zIndex={3} delayMs={60}>
+                    <Image
+                      src={ev.chunk.src}
+                      alt={ev.chunk.alt}
+                      width={Math.max(1, Math.round(ev.chunk.w))}
+                      height={Math.max(1, Math.round(ev.chunk.h))}
+                      priority
+                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                    />
+
+                    {ev.links?.map((lnk, idx) => (
+                      <a
+                        key={`${ev.key}-lnk-${idx}`}
+                        href={lnk.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={lnk.ariaLabel ?? "Open link"}
+                        style={{
+                          position: "absolute",
+                          left: lnk.x,
+                          top: lnk.y,
+                          width: lnk.w,
+                          height: lnk.h,
+                          display: "block",
+                          cursor: "pointer",
+                        }}
+                      />
+                    ))}
+                  </RevealLayer>
+                </React.Fragment>
+              );
+            })}
 
             <AbsImage rect={footerRect} priority zIndex={999999} />
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={scrollToTop}
+          aria-label="Back to top"
+          style={{
+            position: "absolute",
+            right: 28,
+            bottom: 28,
+            zIndex: 100000,
+            width: 58,
+            height: 58,
+            borderRadius: 999,
+            border: "1px solid rgba(0,0,0,0.10)",
+            background: "rgba(255,255,255,0.96)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 14px 36px rgba(0,0,0,0.28)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+            opacity: showBackToTop ? 1 : 0,
+            transform: showBackToTop ? "translateY(0px)" : "translateY(12px)",
+            pointerEvents: showBackToTop ? "auto" : "none",
+            transition: "opacity 180ms ease, transform 180ms ease",
+            padding: 0,
+          }}
+        >
+          <Image
+            src="/assets/arrow_up_button.svg"
+            alt="Back to top"
+            width={24}
+            height={24}
+            priority
+            style={{
+              width: 168,
+              height: 168,
+              objectFit: "contain",
+              pointerEvents: "none",
+            }}
+          />
+        </button>
       </div>
     </div>
   );

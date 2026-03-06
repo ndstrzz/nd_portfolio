@@ -1,9 +1,9 @@
-// C:\Users\User\Downloads\andy_portfolio\app\experience\page.tsx
 "use client";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import OcbcFindOutMoreFrame from "./_components/OcbcFindOutMoreFrame";
+import AuctoFindOutMoreFrame from "./_components/AuctoFindOutMoreFrame";
 
 declare global {
   namespace JSX {
@@ -67,7 +67,7 @@ const DECK_DOCK = {
   gap: 44,
 };
 
-const OCBC_FINAL_DOCK = {
+const FINAL_DETAIL_DOCK = {
   x: -380,
   y: 100,
   gap: 44,
@@ -239,6 +239,7 @@ function DeckOverlay({
   const [phase, setPhase] = useState<"from" | "center" | "dock">("from");
   const [showPanel, setShowPanel] = useState(false);
   const [ocbcDetailOpen, setOcbcDetailOpen] = useState(false);
+  const [auctoDetailOpen, setAuctoDetailOpen] = useState(false);
 
   const CONTENT_PAD_TOP = 100;
 
@@ -263,15 +264,17 @@ function DeckOverlay({
     h: DECK_EXPANDED.h,
   };
 
-  const dockRectOcbcFinal: Rect = {
-    x: OCBC_FINAL_DOCK.x,
-    y: OCBC_FINAL_DOCK.y + CONTENT_PAD_TOP,
+  const dockRectFinalDetail: Rect = {
+    x: FINAL_DETAIL_DOCK.x,
+    y: FINAL_DETAIL_DOCK.y + CONTENT_PAD_TOP,
     w: DECK_EXPANDED.w,
     h: DECK_EXPANDED.h,
   };
 
-  const dockRect =
-    deck.id === "ocbc" && ocbcDetailOpen ? dockRectOcbcFinal : dockRectDefault;
+  const isFinalDetailDock =
+    (deck.id === "ocbc" && ocbcDetailOpen) || (deck.id === "aucto" && auctoDetailOpen);
+
+  const dockRect = isFinalDetailDock ? dockRectFinalDetail : dockRectDefault;
 
   useEffect(() => {
     const t1 = window.setTimeout(() => setPhase("center"), 40);
@@ -291,10 +294,14 @@ function DeckOverlay({
 
   const closeAll = () => {
     setOcbcDetailOpen(false);
+    setAuctoDetailOpen(false);
     onClose();
   };
 
-  const showRightPanel = !(deck.id === "ocbc" && ocbcDetailOpen);
+  const detailTakeoverOpen =
+    (deck.id === "ocbc" && ocbcDetailOpen) || (deck.id === "aucto" && auctoDetailOpen);
+
+  const showRightPanel = !detailTakeoverOpen;
 
   return (
     <div
@@ -352,6 +359,27 @@ function DeckOverlay({
               open={true}
               topY={0}
               onClose={() => setOcbcDetailOpen(false)}
+            />
+          </div>
+        ) : null}
+
+        {deck.id === "aucto" && auctoDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AuctoFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setAuctoDetailOpen(false)}
             />
           </div>
         ) : null}
@@ -487,6 +515,7 @@ function DeckOverlay({
                     controls
                     playsInline
                     preload="metadata"
+                    autoPlay
                     style={{
                       width: "100%",
                       height: "100%",
@@ -516,6 +545,11 @@ function DeckOverlay({
                       setOcbcDetailOpen(true);
                       if (phase !== "dock") setPhase("dock");
                     }
+
+                    if (deck.id === "aucto") {
+                      setAuctoDetailOpen(true);
+                      if (phase !== "dock") setPhase("dock");
+                    }
                   }}
                   aria-label="Find out more"
                   style={{
@@ -523,9 +557,9 @@ function DeckOverlay({
                     background: "transparent",
                     border: "none",
                     padding: 0,
-                    cursor: deck.id === "ocbc" ? "pointer" : "default",
+                    cursor: deck.id === "ocbc" || deck.id === "aucto" ? "pointer" : "default",
                     alignSelf: "flex-start",
-                    opacity: deck.id === "ocbc" ? 1 : 0.6,
+                    opacity: deck.id === "ocbc" || deck.id === "aucto" ? 1 : 0.6,
                   }}
                 >
                   <Image
@@ -588,7 +622,7 @@ export default function ExperiencePage() {
         alt: "Taedal deck",
         rect: { x: DECK.x1, y: DECK.y1, w: DECK.w, h: DECK.h },
         youtubeEmbedSrc:
-          "https://www.youtube.com/embed/K6o_OwgvwIw?si=1bQLvUohS6U0iusN",
+          "https://www.youtube.com/embed/K6o_OwgvwIw?autoplay=1&playsinline=1&rel=0",
         findOutMoreBtnSrc: "/assets/find_out_more.svg",
       },
       {
@@ -597,7 +631,7 @@ export default function ExperiencePage() {
         alt: "OCBC deck",
         rect: { x: DECK.x2, y: DECK.y1, w: DECK.w, h: DECK.h },
         youtubeEmbedSrc:
-          "https://www.youtube.com/embed/TRokrwZoiW4?si=1QbKA3uiE-mn6Qh1",
+          "https://www.youtube.com/embed/TRokrwZoiW4?autoplay=1&playsinline=1&rel=0",
         findOutMoreBtnSrc: "/assets/find_out_more.svg",
       },
       {
@@ -605,6 +639,7 @@ export default function ExperiencePage() {
         src: "/assets/aucto_deck.svg",
         alt: "Aucto deck",
         rect: { x: DECK.x3, y: DECK.y1, w: DECK.w, h: DECK.h },
+        findOutMoreBtnSrc: "/assets/find_out_more.svg",
       },
       {
         id: "uniqlo",
@@ -612,7 +647,7 @@ export default function ExperiencePage() {
         alt: "Uniqlo deck",
         rect: { x: DECK_POS.uniqloX, y: DECK.y1, w: DECK.w, h: DECK.h },
         youtubeEmbedSrc:
-          "https://www.youtube.com/embed/HgJPtRzLF_0?si=ktpEvpNJVY6rbWY5",
+          "https://www.youtube.com/embed/HgJPtRzLF_0?autoplay=1&playsinline=1&rel=0",
         findOutMoreBtnSrc: "/assets/find_out_more.svg",
       },
       {
@@ -627,7 +662,7 @@ export default function ExperiencePage() {
         alt: "Activ deck",
         rect: { x: DECK.x2, y: DECK_POS.row2Y, w: DECK.w, h: DECK.h },
         youtubeEmbedSrc:
-          "https://www.youtube.com/embed/HgJPtRzLF_0?si=ktpEvpNJVY6rbWY5",
+          "https://www.youtube.com/embed/HgJPtRzLF_0?autoplay=1&playsinline=1&rel=0",
         findOutMoreBtnSrc: "/assets/find_out_more.svg",
       },
     ],
