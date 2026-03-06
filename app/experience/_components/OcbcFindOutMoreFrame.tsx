@@ -24,7 +24,7 @@ const FRAME_H_TERM1 = 30800;
 const FRAME_H_TERM2 = 36680;
 
 // ✅ Shift the whole frame UP by this amount (edit anytime)
-const FRAME_SHIFT_Y = -300;
+const FRAME_SHIFT_Y = -10;
 
 // Introduction.svg placement
 const INTRO = {
@@ -404,10 +404,9 @@ function ShiningLine({
   baseColor = "rgba(255,255,255,0.55)",
   glowColor = "rgba(255,255,255,0.95)",
   zIndex = 2,
-  // freedom knobs
-  sparkleSize = 1220, // height of the travelling highlight
-  durationMs = 200000, // speed
-  blurPx = 20, // glow softness
+  sparkleSize = 1220,
+  durationMs = 200000,
+  blurPx = 20,
 }: {
   x: number;
   y: number;
@@ -422,7 +421,6 @@ function ShiningLine({
 }) {
   return (
     <>
-      {/* local styles for this component (safe in Next client component) */}
       <style>{`
         @keyframes ocbc-line-spark {
           0%   { transform: translateY(-${sparkleSize}px); opacity: 0; }
@@ -444,7 +442,6 @@ function ShiningLine({
           pointerEvents: "none",
         }}
       >
-        {/* Base line */}
         <div
           style={{
             position: "absolute",
@@ -454,7 +451,6 @@ function ShiningLine({
           }}
         />
 
-        {/* Soft outer glow for the whole line */}
         <div
           style={{
             position: "absolute",
@@ -466,11 +462,10 @@ function ShiningLine({
           }}
         />
 
-        {/* Travelling sparkle */}
         <div
           style={{
             position: "absolute",
-            left: -Math.max(6, thickness * 2), // let glow extend sideways
+            left: -Math.max(6, thickness * 2),
             width: thickness + Math.max(12, thickness * 4),
             height: sparkleSize,
             background: `linear-gradient(to bottom,
@@ -484,7 +479,6 @@ function ShiningLine({
           }}
         />
 
-        {/* Crisp core sparkle */}
         <div
           style={{
             position: "absolute",
@@ -516,20 +510,17 @@ export default function OcbcFindOutMoreFrame({
 }) {
   const [term, setTerm] = useState<"first" | "second">("first");
 
-  // ✅ dynamic frame height per term
   const frameH = term === "first" ? FRAME_H_TERM1 : FRAME_H_TERM2;
 
   const activeEvents = useMemo(() => {
     return term === "first" ? TERM1_EVENTS : TERM2_EVENTS;
   }, [term]);
 
-  // ✅ FOOTER RECT (direct, editable)
   const footerRect: Rect & { src: string; alt: string } =
     term === "first"
       ? { ...FOOTER_TERM1, src: FOOTER_SRC, alt: FOOTER_ALT }
       : { ...FOOTER_TERM2, src: FOOTER_SRC, alt: FOOTER_ALT };
 
-  // ✅ Line settings per term
   const line = term === "first" ? TERM1_DIVIDER : TERM2_DIVIDER;
 
   return (
@@ -539,28 +530,26 @@ export default function OcbcFindOutMoreFrame({
         left: 0,
         top: topY + FRAME_SHIFT_Y,
         width: FRAME_W,
-        height: "100vh",
+        height: "100%",
         pointerEvents: open ? "auto" : "none",
         zIndex: 1,
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Slide-up container */}
       <div
         style={{
           position: "absolute",
           left: 0,
-          bottom: 0,
+          top: 0,
           width: FRAME_W,
-          height: "100vh",
-          overflow: "visible",
+          height: "100%",
+          overflow: "hidden",
           borderRadius: 0,
           background: "rgba(0,0,0,0.0)",
           transform: open ? "translateY(0px)" : "translateY(100%)",
           transition: "transform 520ms cubic-bezier(.2,.9,.2,1)",
         }}
       >
-        {/* Dim */}
         <div
           style={{
             position: "absolute",
@@ -570,7 +559,6 @@ export default function OcbcFindOutMoreFrame({
           }}
         />
 
-        {/* Scroll */}
         <div
           style={{
             position: "absolute",
@@ -584,11 +572,11 @@ export default function OcbcFindOutMoreFrame({
             style={{
               position: "relative",
               width: FRAME_W,
+              minHeight: "100%",
               height: frameH,
               background: "#000000",
             }}
           >
-            {/* Close */}
             <button
               type="button"
               onClick={onClose}
@@ -616,7 +604,6 @@ export default function OcbcFindOutMoreFrame({
               ✕
             </button>
 
-            {/* Introduction */}
             <AbsImage
               rect={{
                 x: INTRO.x,
@@ -630,7 +617,6 @@ export default function OcbcFindOutMoreFrame({
               zIndex={5}
             />
 
-            {/* Term buttons */}
             <button
               type="button"
               onClick={() => setTerm("first")}
@@ -685,7 +671,6 @@ export default function OcbcFindOutMoreFrame({
               />
             </button>
 
-            {/* ✅ SHINING TERM LINE (behind titles) */}
             <ShiningLine
               x={line.x}
               y={line.y}
@@ -694,16 +679,13 @@ export default function OcbcFindOutMoreFrame({
               baseColor={line.baseColor}
               glowColor={line.glowColor}
               zIndex={2}
-              // tweakable knobs:
               sparkleSize={220}
               durationMs={2600}
               blurPx={10}
             />
 
-            {/* Active term events */}
             {activeEvents.map((ev) => (
               <React.Fragment key={ev.key}>
-                {/* Titles above the line */}
                 <AbsImage rect={ev.title} priority zIndex={5} />
 
                 <div
@@ -747,7 +729,6 @@ export default function OcbcFindOutMoreFrame({
               </React.Fragment>
             ))}
 
-            {/* ✅ FOOTER — ALWAYS ON TOP */}
             <AbsImage rect={footerRect} priority zIndex={999999} />
           </div>
         </div>

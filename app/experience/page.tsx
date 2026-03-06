@@ -25,8 +25,8 @@ const CONTENT_DY = -130;
 
 // ✅ NAV BAR GLASS BACKDROP so scrolling content won't visually overlap
 const NAV_GLASS = {
-  height: 120, // must match navbar container height
-  bg: "rgba(0,0,0,0.100)", // transparent black
+  height: 120,
+  bg: "rgba(0,0,0,0.100)",
   border: "rgba(255,255,255,0.08)",
   blurPx: 14,
 };
@@ -59,23 +59,17 @@ const DECK_POS = {
   aitX: 258,
 };
 
-// Overlay target size for expanded deck
 const DECK_EXPANDED = { w: 454, h: 711.44 };
 
-// Default dock-left position (before "find out more")
 const DECK_DOCK = {
   x: 180,
-  y: 220,
+  y: 100,
   gap: 44,
 };
 
-/**
- * ✅ FINAL DOCK POSITION FOR OCBC after "Find out more"
- * Change these numbers anytime to shift the OCBC deck further left/right/up/down.
- */
 const OCBC_FINAL_DOCK = {
-  x: -380, // 👈 more negative = more left
-  y: 220,
+  x: -380,
+  y: 100,
   gap: 44,
 };
 
@@ -244,11 +238,9 @@ function DeckOverlay({
 }) {
   const [phase, setPhase] = useState<"from" | "center" | "dock">("from");
   const [showPanel, setShowPanel] = useState(false);
-
-  // ✅ OCBC "find out more" state
   const [ocbcDetailOpen, setOcbcDetailOpen] = useState(false);
 
-  const CONTENT_PAD_TOP = 140;
+  const CONTENT_PAD_TOP = 100;
 
   const fromRect: Rect = {
     x: deck.rect.x,
@@ -278,7 +270,8 @@ function DeckOverlay({
     h: DECK_EXPANDED.h,
   };
 
-  const dockRect = deck.id === "ocbc" && ocbcDetailOpen ? dockRectOcbcFinal : dockRectDefault;
+  const dockRect =
+    deck.id === "ocbc" && ocbcDetailOpen ? dockRectOcbcFinal : dockRectDefault;
 
   useEffect(() => {
     const t1 = window.setTimeout(() => setPhase("center"), 40);
@@ -338,19 +331,18 @@ function DeckOverlay({
           transform: `translateX(-50%) scale(${scale})`,
           transformOrigin: "top center",
           width: DESIGN.w,
-          height: "100vh",
+          height: `calc(100vh / ${scale})`,
           pointerEvents: "none",
         }}
       >
-        {/* ✅ IMPORTANT: The frame is NOT mounted unless ocbcDetailOpen === true */}
         {deck.id === "ocbc" && ocbcDetailOpen ? (
           <div
             style={{
               position: "absolute",
               left: 0,
-              top: dockRect.y + 20,
+              top: 0,
               width: DESIGN.w,
-              height: 1400,
+              height: `calc(100vh / ${scale})`,
               pointerEvents: "auto",
               zIndex: 1,
             }}
@@ -364,7 +356,6 @@ function DeckOverlay({
           </div>
         ) : null}
 
-        {/* Deck card (always above everything) */}
         <div
           style={{
             position: "absolute",
@@ -431,7 +422,6 @@ function DeckOverlay({
           </button>
         </div>
 
-        {/* Right-side panel (removed entirely when OCBC detail open) */}
         {showRightPanel && (
           <div
             style={{
@@ -663,7 +653,6 @@ export default function ExperiencePage() {
       )}
 
       <div style={{ position: "relative", minHeight: "140vh" }}>
-        {/* Fixed background */}
         <div
           style={{
             position: "fixed",
@@ -697,7 +686,6 @@ export default function ExperiencePage() {
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
         </div>
 
-        {/* Fixed navbar */}
         <div
           style={{
             position: "fixed",
@@ -790,7 +778,6 @@ export default function ExperiencePage() {
           </div>
         </div>
 
-        {/* Scrolling content */}
         <div style={{ position: "relative", zIndex: 2, width: "100%" }}>
           <div
             style={{
