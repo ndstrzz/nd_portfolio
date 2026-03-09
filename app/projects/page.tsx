@@ -23,8 +23,14 @@ const CONTENT_PAD_TOP = 140;
 
 const NAV_POS = {
   ndLogo: { x: 36, y: 15, w: 357.24, h: 97 },
-  nav: { x: 406, y: 55, h: 18, gap: 47 },
-  navItem: { w: 44, h: 18 },
+
+  navItems: {
+    home: { x: 406, y: 55, w: 44, h: 18 },
+    about: { x: 497, y: 55, w: 46, h: 18 },
+    experience: { x: 593, y: 55, w: 82, h: 18 },
+    projects: { x: 722, y: 55, w: 60, h: 18 },
+  },
+
   topIcons: { x: 1669, y: 51, w: 31, h: 26, gap: 27 },
 };
 
@@ -973,10 +979,42 @@ export default function ProjectsPage() {
 
   const navItems = useMemo(
     () => [
-      { src: "/assets/Home.svg", alt: "Home", href: "/" },
-      { src: "/assets/About.svg", alt: "About", href: "/about" },
-      { src: "/assets/Experience.svg", alt: "Experience", href: "/experience" },
-      { src: "/assets/Projects.svg", alt: "Projects", href: "/projects" },
+      {
+        src: "/assets/Home.svg",
+        alt: "Home",
+        href: "/",
+        x: NAV_POS.navItems.home.x,
+        y: NAV_POS.navItems.home.y,
+        w: NAV_POS.navItems.home.w,
+        h: NAV_POS.navItems.home.h,
+      },
+      {
+        src: "/assets/About.svg",
+        alt: "About",
+        href: "/about",
+        x: NAV_POS.navItems.about.x,
+        y: NAV_POS.navItems.about.y,
+        w: NAV_POS.navItems.about.w,
+        h: NAV_POS.navItems.about.h,
+      },
+      {
+        src: "/assets/Experience.svg",
+        alt: "Experience",
+        href: "/experience",
+        x: NAV_POS.navItems.experience.x,
+        y: NAV_POS.navItems.experience.y,
+        w: NAV_POS.navItems.experience.w,
+        h: NAV_POS.navItems.experience.h,
+      },
+      {
+        src: "/assets/Projects.svg",
+        alt: "Projects",
+        href: "/projects",
+        x: NAV_POS.navItems.projects.x,
+        y: NAV_POS.navItems.projects.y,
+        w: NAV_POS.navItems.projects.w,
+        h: NAV_POS.navItems.projects.h,
+      },
     ],
     []
   );
@@ -1122,33 +1160,30 @@ export default function ProjectsPage() {
               priority
             />
 
-            <div
-              style={{
-                position: "absolute",
-                left: NAV_POS.nav.x,
-                top: NAV_POS.nav.y,
-                height: NAV_POS.nav.h,
-                display: "flex",
-                alignItems: "center",
-                gap: NAV_POS.nav.gap,
-                userSelect: "none",
-              }}
-            >
-              {navItems.map((item) => (
-                <IconButton key={item.alt} href={item.href} ariaLabel={item.alt}>
-                  <div style={{ width: NAV_POS.navItem.w, height: NAV_POS.navItem.h }}>
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      width={NAV_POS.navItem.w}
-                      height={NAV_POS.navItem.h}
-                      priority={item.alt === "Projects"}
-                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                    />
-                  </div>
+            {navItems.map((item) => (
+              <div
+                key={item.alt}
+                style={{
+                  position: "absolute",
+                  left: item.x,
+                  top: item.y,
+                  width: item.w,
+                  height: item.h,
+                  userSelect: "none",
+                }}
+              >
+                <IconButton href={item.href} ariaLabel={item.alt}>
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    width={item.w}
+                    height={item.h}
+                    priority={item.alt === "Projects"}
+                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                  />
                 </IconButton>
-              ))}
-            </div>
+              </div>
+            ))}
 
             <div
               style={{
