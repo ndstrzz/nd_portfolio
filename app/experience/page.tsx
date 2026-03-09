@@ -7,6 +7,7 @@ import AuctoFindOutMoreFrame from "./_components/AuctoFindOutMoreFrame";
 import TaedalFindOutMoreFrame from "./_components/TaedalFindOutMoreFrame";
 import ActivHealthFindOutMoreFrame from "./_components/ActivHealthFindOutMoreFrame";
 import AitFindOutMoreFrame from "./_components/AitFindOutMoreFrame";
+import UniqloFindOutMoreFrame from "./_components/UniqloFindOutMoreFrame";
 
 declare global {
   namespace JSX {
@@ -250,6 +251,7 @@ function DeckOverlay({
   const [taedalDetailOpen, setTaedalDetailOpen] = useState(false);
   const [activDetailOpen, setActivDetailOpen] = useState(false);
   const [aitDetailOpen, setAitDetailOpen] = useState(false);
+  const [uniqloDetailOpen, setUniqloDetailOpen] = useState(false);
 
   const CONTENT_PAD_TOP = 100;
 
@@ -286,7 +288,8 @@ function DeckOverlay({
     (deck.id === "aucto" && auctoDetailOpen) ||
     (deck.id === "taedal" && taedalDetailOpen) ||
     (deck.id === "activ" && activDetailOpen) ||
-    (deck.id === "ait" && aitDetailOpen);
+    (deck.id === "ait" && aitDetailOpen) ||
+    (deck.id === "uniqlo" && uniqloDetailOpen);
 
   const dockRect = isFinalDetailDock ? dockRectFinalDetail : dockRectDefault;
 
@@ -312,6 +315,7 @@ function DeckOverlay({
     setTaedalDetailOpen(false);
     setActivDetailOpen(false);
     setAitDetailOpen(false);
+    setUniqloDetailOpen(false);
     onClose();
   };
 
@@ -320,7 +324,8 @@ function DeckOverlay({
     (deck.id === "aucto" && auctoDetailOpen) ||
     (deck.id === "taedal" && taedalDetailOpen) ||
     (deck.id === "activ" && activDetailOpen) ||
-    (deck.id === "ait" && aitDetailOpen);
+    (deck.id === "ait" && aitDetailOpen) ||
+    (deck.id === "uniqlo" && uniqloDetailOpen);
 
   const showRightPanel = !detailTakeoverOpen;
 
@@ -457,6 +462,27 @@ function DeckOverlay({
             onClick={(e) => e.stopPropagation()}
           >
             <AitFindOutMoreFrame open={true} topY={0} onClose={() => setAitDetailOpen(false)} />
+          </div>
+        ) : null}
+
+        {deck.id === "uniqlo" && uniqloDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <UniqloFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setUniqloDetailOpen(false)}
+            />
           </div>
         ) : null}
 
@@ -651,6 +677,11 @@ function DeckOverlay({
                       setAitDetailOpen(true);
                       if (phase !== "dock") setPhase("dock");
                     }
+
+                    if (deck.id === "uniqlo") {
+                      setUniqloDetailOpen(true);
+                      if (phase !== "dock") setPhase("dock");
+                    }
                   }}
                   aria-label="Find out more"
                   style={{
@@ -663,7 +694,8 @@ function DeckOverlay({
                       deck.id === "aucto" ||
                       deck.id === "taedal" ||
                       deck.id === "activ" ||
-                      deck.id === "ait"
+                      deck.id === "ait" ||
+                      deck.id === "uniqlo"
                         ? "pointer"
                         : "default",
                     alignSelf: "flex-start",
@@ -672,7 +704,8 @@ function DeckOverlay({
                       deck.id === "aucto" ||
                       deck.id === "taedal" ||
                       deck.id === "activ" ||
-                      deck.id === "ait"
+                      deck.id === "ait" ||
+                      deck.id === "uniqlo"
                         ? 1
                         : 0.6,
                   }}
