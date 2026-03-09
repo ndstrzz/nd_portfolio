@@ -6,6 +6,7 @@ import OcbcFindOutMoreFrame from "./_components/OcbcFindOutMoreFrame";
 import AuctoFindOutMoreFrame from "./_components/AuctoFindOutMoreFrame";
 import TaedalFindOutMoreFrame from "./_components/TaedalFindOutMoreFrame";
 import ActivHealthFindOutMoreFrame from "./_components/ActivHealthFindOutMoreFrame";
+import AitFindOutMoreFrame from "./_components/AitFindOutMoreFrame";
 
 declare global {
   namespace JSX {
@@ -248,6 +249,7 @@ function DeckOverlay({
   const [auctoDetailOpen, setAuctoDetailOpen] = useState(false);
   const [taedalDetailOpen, setTaedalDetailOpen] = useState(false);
   const [activDetailOpen, setActivDetailOpen] = useState(false);
+  const [aitDetailOpen, setAitDetailOpen] = useState(false);
 
   const CONTENT_PAD_TOP = 100;
 
@@ -283,7 +285,8 @@ function DeckOverlay({
     (deck.id === "ocbc" && ocbcDetailOpen) ||
     (deck.id === "aucto" && auctoDetailOpen) ||
     (deck.id === "taedal" && taedalDetailOpen) ||
-    (deck.id === "activ" && activDetailOpen);
+    (deck.id === "activ" && activDetailOpen) ||
+    (deck.id === "ait" && aitDetailOpen);
 
   const dockRect = isFinalDetailDock ? dockRectFinalDetail : dockRectDefault;
 
@@ -308,6 +311,7 @@ function DeckOverlay({
     setAuctoDetailOpen(false);
     setTaedalDetailOpen(false);
     setActivDetailOpen(false);
+    setAitDetailOpen(false);
     onClose();
   };
 
@@ -315,7 +319,8 @@ function DeckOverlay({
     (deck.id === "ocbc" && ocbcDetailOpen) ||
     (deck.id === "aucto" && auctoDetailOpen) ||
     (deck.id === "taedal" && taedalDetailOpen) ||
-    (deck.id === "activ" && activDetailOpen);
+    (deck.id === "activ" && activDetailOpen) ||
+    (deck.id === "ait" && aitDetailOpen);
 
   const showRightPanel = !detailTakeoverOpen;
 
@@ -435,6 +440,23 @@ function DeckOverlay({
               topY={0}
               onClose={() => setActivDetailOpen(false)}
             />
+          </div>
+        ) : null}
+
+        {deck.id === "ait" && aitDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AitFindOutMoreFrame open={true} topY={0} onClose={() => setAitDetailOpen(false)} />
           </div>
         ) : null}
 
@@ -624,6 +646,11 @@ function DeckOverlay({
                       setActivDetailOpen(true);
                       if (phase !== "dock") setPhase("dock");
                     }
+
+                    if (deck.id === "ait") {
+                      setAitDetailOpen(true);
+                      if (phase !== "dock") setPhase("dock");
+                    }
                   }}
                   aria-label="Find out more"
                   style={{
@@ -635,7 +662,8 @@ function DeckOverlay({
                       deck.id === "ocbc" ||
                       deck.id === "aucto" ||
                       deck.id === "taedal" ||
-                      deck.id === "activ"
+                      deck.id === "activ" ||
+                      deck.id === "ait"
                         ? "pointer"
                         : "default",
                     alignSelf: "flex-start",
@@ -643,7 +671,8 @@ function DeckOverlay({
                       deck.id === "ocbc" ||
                       deck.id === "aucto" ||
                       deck.id === "taedal" ||
-                      deck.id === "activ"
+                      deck.id === "activ" ||
+                      deck.id === "ait"
                         ? 1
                         : 0.6,
                   }}
@@ -785,6 +814,7 @@ export default function ExperiencePage() {
         src: "/assets/ait_deck.svg",
         alt: "AIT deck",
         rect: { x: DECK_POS.aitX, y: DECK_POS.row2Y, w: DECK.w, h: DECK.h },
+        findOutMoreBtnSrc: "/assets/find_out_more.svg",
       },
       {
         id: "activ",
