@@ -19,8 +19,8 @@ type EventBlock = {
 
 // ✅ Fixed width, dynamic height per term
 const FRAME_W = 1920;
-const FRAME_H_TERM1 = 30800;
-const FRAME_H_TERM2 = 36680;
+const FRAME_H_TERM1 = 28600;
+const FRAME_H_TERM2 = 34680;
 
 // ✅ Shift the whole frame UP by this amount (edit anytime)
 const FRAME_SHIFT_Y = 0;
