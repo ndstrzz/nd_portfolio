@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ClientShell from "./_components/ClientShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,13 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "andy's portfolio",
-  description: "andy's portfolio",
-  icons: {
-    icon: "/nd-favicon.png",
-    shortcut: "/nd-favicon.png",
-    apple: "/nd-favicon.png",
-  },
+  title: "Andy Sim Portfolio",
+  description: "Portfolio of Sim Wei Bin Andy",
 };
 
 export default function RootLayout({
@@ -32,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ClientShell>{children}</ClientShell>
       </body>
     </html>
   );

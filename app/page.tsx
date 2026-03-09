@@ -287,15 +287,28 @@ export default function Page() {
 
           {/* FRONT LAYER */}
           <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
-            <Asset
-              src="/assets/ND_Logo.svg"
-              alt="ND Logo"
-              x={POS.ndLogo.x}
-              y={POS.ndLogo.y}
-              w={POS.ndLogo.w}
-              h={POS.ndLogo.h}
-              priority
-            />
+            <div
+              style={{
+                position: "absolute",
+                left: POS.ndLogo.x,
+                top: POS.ndLogo.y,
+                width: POS.ndLogo.w,
+                height: POS.ndLogo.h,
+                userSelect: "none",
+                zIndex: 10,
+              }}
+            >
+              <IconButton href="/" ariaLabel="Home">
+                <Image
+                  src="/assets/ND_Logo.svg"
+                  alt="ND Logo"
+                  width={Math.round(POS.ndLogo.w)}
+                  height={Math.round(POS.ndLogo.h)}
+                  priority
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                />
+              </IconButton>
+            </div>
 
             {/* ✅ exact nav item positions */}
             {navItems.map((item) => (

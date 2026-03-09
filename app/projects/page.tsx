@@ -878,11 +878,9 @@ function FolderOverlay({
                       letterSpacing: 0.2,
                     }}
                   >
-                    No video has been published by the organiser yet, please click the
-    {" "}
-    “Find Out More”
-    {" "}
-    button to read my experience here.
+                    No video has been published by the organiser yet, please click the{" "}
+                    “Find Out More”{" "}
+                    button to read my experience here.
                   </div>
                 ) : youtubeEmbedSrc ? (
                   <iframe
@@ -1154,15 +1152,28 @@ export default function ProjectsPage() {
           />
 
           <div style={{ position: "absolute", inset: 0, pointerEvents: "auto" }}>
-            <Asset
-              src="/assets/ND_Logo.svg"
-              alt="ND Logo"
-              x={NAV_POS.ndLogo.x}
-              y={NAV_POS.ndLogo.y}
-              w={NAV_POS.ndLogo.w}
-              h={NAV_POS.ndLogo.h}
-              priority
-            />
+            <div
+              style={{
+                position: "absolute",
+                left: NAV_POS.ndLogo.x,
+                top: NAV_POS.ndLogo.y,
+                width: NAV_POS.ndLogo.w,
+                height: NAV_POS.ndLogo.h,
+                userSelect: "none",
+                zIndex: 10,
+              }}
+            >
+              <IconButton href="/" ariaLabel="Home">
+                <Image
+                  src="/assets/ND_Logo.svg"
+                  alt="ND Logo"
+                  width={Math.round(NAV_POS.ndLogo.w)}
+                  height={Math.round(NAV_POS.ndLogo.h)}
+                  priority
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                />
+              </IconButton>
+            </div>
 
             {navItems.map((item) => (
               <div

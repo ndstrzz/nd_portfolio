@@ -40,6 +40,16 @@ body * {
   cursor: url("/assets/kuro_cursor.svg") 8 8, auto;
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+}
+
+* {
+  box-sizing: border-box;
+}
 /* ✅ Same custom cursor for interactive elements */
 a,
 button,
