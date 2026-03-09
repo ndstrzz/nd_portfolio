@@ -580,17 +580,23 @@ function DeckOverlay({
                 ) : (
                   <div
                     style={{
-                      color: "rgba(255,255,255,0.75)",
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      padding: "0 72px",
+                      color: "rgba(255,255,255,0.78)",
                       fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial",
-                      fontSize: 18,
+                      fontSize: 24,
+                      lineHeight: 1.6,
                       letterSpacing: 0.2,
                     }}
                   >
-                    No video has been published by the organiser yet, please click the
-    {" "}
-    “Find Out More”
-    {" "}
-    button to read my experience here.
+                    {deck.findOutMoreBtnSrc
+                      ? 'No video has been published by the organiser yet, please click the "Find Out More" button to read my experience here.'
+                      : "No video has been published by the organiser yet."}
                   </div>
                 )}
               </div>
