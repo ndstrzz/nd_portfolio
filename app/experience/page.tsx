@@ -4,6 +4,8 @@ import Image from "next/image";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import OcbcFindOutMoreFrame from "./_components/OcbcFindOutMoreFrame";
 import AuctoFindOutMoreFrame from "./_components/AuctoFindOutMoreFrame";
+import TaedalFindOutMoreFrame from "./_components/TaedalFindOutMoreFrame";
+import ActivHealthFindOutMoreFrame from "./_components/ActivHealthFindOutMoreFrame";
 
 declare global {
   namespace JSX {
@@ -20,10 +22,8 @@ type Rect = { x: number; y: number; w: number; h: number };
 
 const DESIGN: Size = { w: 1920, h: 1080 };
 
-// ✅ Move everything (icon + title + decks) up by this amount
 const CONTENT_DY = -130;
 
-// ✅ NAV BAR GLASS BACKDROP so scrolling content won't visually overlap
 const NAV_GLASS = {
   height: 120,
   bg: "rgba(0,0,0,0.100)",
@@ -240,6 +240,8 @@ function DeckOverlay({
   const [showPanel, setShowPanel] = useState(false);
   const [ocbcDetailOpen, setOcbcDetailOpen] = useState(false);
   const [auctoDetailOpen, setAuctoDetailOpen] = useState(false);
+  const [taedalDetailOpen, setTaedalDetailOpen] = useState(false);
+  const [activDetailOpen, setActivDetailOpen] = useState(false);
 
   const CONTENT_PAD_TOP = 100;
 
@@ -272,7 +274,10 @@ function DeckOverlay({
   };
 
   const isFinalDetailDock =
-    (deck.id === "ocbc" && ocbcDetailOpen) || (deck.id === "aucto" && auctoDetailOpen);
+    (deck.id === "ocbc" && ocbcDetailOpen) ||
+    (deck.id === "aucto" && auctoDetailOpen) ||
+    (deck.id === "taedal" && taedalDetailOpen) ||
+    (deck.id === "activ" && activDetailOpen);
 
   const dockRect = isFinalDetailDock ? dockRectFinalDetail : dockRectDefault;
 
@@ -295,11 +300,16 @@ function DeckOverlay({
   const closeAll = () => {
     setOcbcDetailOpen(false);
     setAuctoDetailOpen(false);
+    setTaedalDetailOpen(false);
+    setActivDetailOpen(false);
     onClose();
   };
 
   const detailTakeoverOpen =
-    (deck.id === "ocbc" && ocbcDetailOpen) || (deck.id === "aucto" && auctoDetailOpen);
+    (deck.id === "ocbc" && ocbcDetailOpen) ||
+    (deck.id === "aucto" && auctoDetailOpen) ||
+    (deck.id === "taedal" && taedalDetailOpen) ||
+    (deck.id === "activ" && activDetailOpen);
 
   const showRightPanel = !detailTakeoverOpen;
 
@@ -355,11 +365,7 @@ function DeckOverlay({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <OcbcFindOutMoreFrame
-              open={true}
-              topY={0}
-              onClose={() => setOcbcDetailOpen(false)}
-            />
+            <OcbcFindOutMoreFrame open={true} topY={0} onClose={() => setOcbcDetailOpen(false)} />
           </div>
         ) : null}
 
@@ -380,6 +386,48 @@ function DeckOverlay({
               open={true}
               topY={0}
               onClose={() => setAuctoDetailOpen(false)}
+            />
+          </div>
+        ) : null}
+
+        {deck.id === "taedal" && taedalDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <TaedalFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setTaedalDetailOpen(false)}
+            />
+          </div>
+        ) : null}
+
+        {deck.id === "activ" && activDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ActivHealthFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setActivDetailOpen(false)}
             />
           </div>
         ) : null}
@@ -550,6 +598,16 @@ function DeckOverlay({
                       setAuctoDetailOpen(true);
                       if (phase !== "dock") setPhase("dock");
                     }
+
+                    if (deck.id === "taedal") {
+                      setTaedalDetailOpen(true);
+                      if (phase !== "dock") setPhase("dock");
+                    }
+
+                    if (deck.id === "activ") {
+                      setActivDetailOpen(true);
+                      if (phase !== "dock") setPhase("dock");
+                    }
                   }}
                   aria-label="Find out more"
                   style={{
@@ -557,9 +615,21 @@ function DeckOverlay({
                     background: "transparent",
                     border: "none",
                     padding: 0,
-                    cursor: deck.id === "ocbc" || deck.id === "aucto" ? "pointer" : "default",
+                    cursor:
+                      deck.id === "ocbc" ||
+                      deck.id === "aucto" ||
+                      deck.id === "taedal" ||
+                      deck.id === "activ"
+                        ? "pointer"
+                        : "default",
                     alignSelf: "flex-start",
-                    opacity: deck.id === "ocbc" || deck.id === "aucto" ? 1 : 0.6,
+                    opacity:
+                      deck.id === "ocbc" ||
+                      deck.id === "aucto" ||
+                      deck.id === "taedal" ||
+                      deck.id === "activ"
+                        ? 1
+                        : 0.6,
                   }}
                 >
                   <Image
@@ -661,8 +731,6 @@ export default function ExperiencePage() {
         src: "/assets/activ_deck.svg",
         alt: "Activ deck",
         rect: { x: DECK.x2, y: DECK_POS.row2Y, w: DECK.w, h: DECK.h },
-        youtubeEmbedSrc:
-          "https://www.youtube.com/embed/HgJPtRzLF_0?autoplay=1&playsinline=1&rel=0",
         findOutMoreBtnSrc: "/assets/find_out_more.svg",
       },
     ],

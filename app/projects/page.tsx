@@ -441,6 +441,7 @@ type FolderOverlayConfig = {
   expanded: { w: number; h: number };
   dock: { x: number; y: number };
   panel: { w: number; h: number; gap: number; dy?: number };
+  youtubeEmbedSrc?: string;
 };
 
 const FIND_OUT_MORE_SRC = "/assets/taedal-deck/find_out_more.svg";
@@ -448,12 +449,12 @@ const FIND_OUT_MORE_SRC = "/assets/taedal-deck/find_out_more.svg";
 // ✅ Your requested video panel dimensions
 const VIDEO_DIM = { w: 1380, h: 920 };
 
-// ✅ Video source per folder (you can add ideun/chingu later)
+// ✅ Video source per folder (fallback for non-YouTube folders)
 const VIDEO_BY_FOLDER: Record<FolderKey, string> = {
   ocbc: "/assets/folder/ocbc/ideun_video.mp4",
   taedal: "/assets/folder/taedal/taedal_video.mov",
   ideun: "/assets/folder/ideun/ideun_video.mp4",
-  chingu: "/assets/folder/ideun/ideun_video.mp4", // placeholder for now
+  chingu: "/assets/folder/ideun/ideun_video.mp4",
 };
 
 const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
@@ -480,6 +481,8 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     expanded: { w: 355, h: 328.4 },
     dock: { x: 70, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
+    youtubeEmbedSrc:
+      "https://www.youtube.com/embed/wIzyWu9xtjA?autoplay=1&playsinline=1&rel=0",
   },
   chingu: {
     key: "chingu",
@@ -537,10 +540,12 @@ function FolderOverlay({
     h: cfg.expanded.h,
   };
 
-  const rect = phase === "from" ? fromRect : phase === "center" ? centerRect : dockRect;
+  const rect =
+    phase === "from" ? fromRect : phase === "center" ? centerRect : dockRect;
   const panelTop = dockRect.y + (cfg.panel.dy ?? 0);
 
   const videoSrc = VIDEO_BY_FOLDER[cfg.key];
+  const youtubeEmbedSrc = cfg.youtubeEmbedSrc;
 
   return (
     <div
@@ -643,7 +648,9 @@ function FolderOverlay({
             }
           }}
         >
-          <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.02)" }} />
+          <div
+            style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.02)" }}
+          />
           <Image
             src={cfg.folderSrc}
             alt={`${cfg.key} folder enlarged`}
@@ -710,8 +717,35 @@ function FolderOverlay({
               gap: 14,
             }}
           >
-            <div style={{ flex: 1 }}>
-              <VideoCard src={videoSrc} autoPlay />
+            <div
+              style={{
+                flex: 1,
+                borderRadius: 18,
+                overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.10)",
+                background: "rgba(255,255,255,0.03)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {youtubeEmbedSrc ? (
+                <iframe
+                  src={youtubeEmbedSrc}
+                  title={`${cfg.key} video`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    border: "none",
+                    display: "block",
+                  }}
+                />
+              ) : (
+                <VideoCard src={videoSrc} autoPlay />
+              )}
             </div>
 
             <button
