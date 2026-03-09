@@ -983,9 +983,21 @@ export default function ProjectsPage() {
 
   const iconItems = useMemo(
     () => [
-      { src: "/assets/email_icon.svg", alt: "Email", href: "mailto:andynilessim05@gmail.com" },
-      { src: "/assets/linkedin_icon.svg", alt: "LinkedIn", href: "#" },
-      { src: "/assets/telegram_icon.svg", alt: "Telegram", href: "#" },
+      {
+        src: "/assets/email_icon.svg",
+        alt: "Email",
+        href: "mailto:andynilessim05@gmail.com",
+      },
+      {
+        src: "/assets/linkedin_icon.svg",
+        alt: "LinkedIn",
+        href: "https://www.linkedin.com/in/andy-sim-61b261287/",
+      },
+      {
+        src: "/assets/telegram_icon.svg",
+        alt: "Telegram",
+        href: "https://t.me/kombuchaddict",
+      },
     ],
     []
   );

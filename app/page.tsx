@@ -17,8 +17,15 @@ const DESIGN: Size = { w: 1920, h: 1080 };
 
 const POS = {
   ndLogo: { x: 36, y: 15, w: 357.24, h: 97 },
-  nav: { x: 406, y: 55, h: 18, gap: 47 },
-  navItem: { w: 44, h: 18 },
+
+  // ✅ exact per-item navbar positions from your Figma
+  navItems: {
+    home: { x: 406, y: 55, w: 44, h: 18 },
+    about: { x: 497, y: 55, w: 46, h: 18 },
+    experience: { x: 593, y: 55, w: 82, h: 18 },
+    projects: { x: 722, y: 55, w: 60, h: 18 },
+  },
+
   topIcons: { x: 1669, y: 51, w: 31, h: 26, gap: 27 },
   namecard: { x: 205, y: 224.65, w: 407.36, h: 638.35 },
   heroText: { x: 719.65, y: 261, w: 735.35, h: 387.06 },
@@ -84,15 +91,19 @@ function IconButton({
   href,
   ariaLabel,
   children,
+  newTab,
 }: {
   href: string;
   ariaLabel: string;
   children: ReactNode;
+  newTab?: boolean;
 }) {
   return (
     <a
       href={href}
       aria-label={ariaLabel}
+      target={newTab ? "_blank" : undefined}
+      rel={newTab ? "noopener noreferrer" : undefined}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -133,10 +144,42 @@ export default function Page() {
 
   const navItems = useMemo(
     () => [
-      { src: "/assets/Home.svg", alt: "Home", href: "/" },
-      { src: "/assets/About.svg", alt: "About", href: "/about" },
-      { src: "/assets/Experience.svg", alt: "Experience", href: "/experience" },
-      { src: "/assets/Projects.svg", alt: "Projects", href: "/projects" },
+      {
+        src: "/assets/Home.svg",
+        alt: "Home",
+        href: "/",
+        x: POS.navItems.home.x,
+        y: POS.navItems.home.y,
+        w: POS.navItems.home.w,
+        h: POS.navItems.home.h,
+      },
+      {
+        src: "/assets/About.svg",
+        alt: "About",
+        href: "/about",
+        x: POS.navItems.about.x,
+        y: POS.navItems.about.y,
+        w: POS.navItems.about.w,
+        h: POS.navItems.about.h,
+      },
+      {
+        src: "/assets/Experience.svg",
+        alt: "Experience",
+        href: "/experience",
+        x: POS.navItems.experience.x,
+        y: POS.navItems.experience.y,
+        w: POS.navItems.experience.w,
+        h: POS.navItems.experience.h,
+      },
+      {
+        src: "/assets/Projects.svg",
+        alt: "Projects",
+        href: "/projects",
+        x: POS.navItems.projects.x,
+        y: POS.navItems.projects.y,
+        w: POS.navItems.projects.w,
+        h: POS.navItems.projects.h,
+      },
     ],
     []
   );
@@ -147,16 +190,19 @@ export default function Page() {
         src: "/assets/email_icon.svg",
         alt: "Email",
         href: "mailto:andynilessim05@gmail.com",
+        newTab: false,
       },
       {
         src: "/assets/linkedin_icon.svg",
         alt: "LinkedIn",
         href: "https://www.linkedin.com/in/andy-sim-61b261287/",
+        newTab: true,
       },
       {
         src: "/assets/telegram_icon.svg",
         alt: "Telegram",
         href: "https://t.me/kombuchaddict",
+        newTab: true,
       },
     ],
     []
@@ -251,33 +297,31 @@ export default function Page() {
               priority
             />
 
-            <div
-              style={{
-                position: "absolute",
-                left: POS.nav.x,
-                top: POS.nav.y,
-                height: POS.nav.h,
-                display: "flex",
-                alignItems: "center",
-                gap: POS.nav.gap,
-                userSelect: "none",
-              }}
-            >
-              {navItems.map((item) => (
-                <IconButton key={item.alt} href={item.href} ariaLabel={item.alt}>
-                  <div style={{ width: POS.navItem.w, height: POS.navItem.h }}>
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      width={POS.navItem.w}
-                      height={POS.navItem.h}
-                      priority={item.alt === "Home"}
-                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                    />
-                  </div>
+            {/* ✅ exact nav item positions */}
+            {navItems.map((item) => (
+              <div
+                key={item.alt}
+                style={{
+                  position: "absolute",
+                  left: item.x,
+                  top: item.y,
+                  width: item.w,
+                  height: item.h,
+                  userSelect: "none",
+                }}
+              >
+                <IconButton href={item.href} ariaLabel={item.alt}>
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    width={item.w}
+                    height={item.h}
+                    priority={item.alt === "Home"}
+                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                  />
                 </IconButton>
-              ))}
-            </div>
+              </div>
+            ))}
 
             <div
               style={{
@@ -290,7 +334,12 @@ export default function Page() {
               }}
             >
               {iconItems.map((item) => (
-                <IconButton key={item.alt} href={item.href} ariaLabel={item.alt}>
+                <IconButton
+                  key={item.alt}
+                  href={item.href}
+                  ariaLabel={item.alt}
+                  newTab={item.newTab}
+                >
                   <div style={{ width: POS.topIcons.w, height: POS.topIcons.h }}>
                     <Image
                       src={item.src}
