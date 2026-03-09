@@ -878,7 +878,11 @@ function FolderOverlay({
                       letterSpacing: 0.2,
                     }}
                   >
-                    Coming soon
+                    No video has been published by the organiser yet, please click the
+    {" "}
+    “Find Out More”
+    {" "}
+    button to read my experience here.
                   </div>
                 ) : youtubeEmbedSrc ? (
                   <iframe
