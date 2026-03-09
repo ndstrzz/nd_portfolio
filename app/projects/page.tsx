@@ -3,6 +3,8 @@
 
 import Image from "next/image";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import IdeunFindOutMoreFrame from "./_components/IdeunFindOutMoreFrame";
+import ChinguFindOutMoreFrame from "./_components/ChinguFindOutMoreFrame";
 
 declare global {
   namespace JSX {
@@ -440,16 +442,17 @@ type FolderOverlayConfig = {
   from: { x: number; y: number; w: number; h: number };
   expanded: { w: number; h: number };
   dock: { x: number; y: number };
+  finalDetailDock?: { x: number; y: number };
   panel: { w: number; h: number; gap: number; dy?: number };
   youtubeEmbedSrc?: string;
 };
 
 const FIND_OUT_MORE_SRC = "/assets/taedal-deck/find_out_more.svg";
 
-// ✅ Your requested video panel dimensions
+// Your requested video panel dimensions
 const VIDEO_DIM = { w: 1380, h: 920 };
 
-// ✅ Video source per folder (fallback for non-YouTube folders)
+// Video source per folder (fallback for non-YouTube folders)
 const VIDEO_BY_FOLDER: Record<FolderKey, string> = {
   ocbc: "/assets/folder/ocbc/ideun_video.mp4",
   taedal: "/assets/folder/taedal/taedal_video.mov",
@@ -464,6 +467,7 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     from: PROJ_POS.taedalFolder,
     expanded: { w: 355, h: 328.4 },
     dock: { x: 70, y: -10 },
+    finalDetailDock: { x: -380, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
   },
   ocbc: {
@@ -472,6 +476,7 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     from: PROJ_POS.ocbcFolder,
     expanded: { w: 355, h: 328.4 },
     dock: { x: 70, y: -10 },
+    finalDetailDock: { x: -380, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
   },
   ideun: {
@@ -480,9 +485,9 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     from: PROJ_POS.ideunFolder,
     expanded: { w: 355, h: 328.4 },
     dock: { x: 70, y: -10 },
+    finalDetailDock: { x: -200, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
-    youtubeEmbedSrc:
-      "https://www.youtube.com/embed/wIzyWu9xtjA?autoplay=1&playsinline=1&rel=0",
+    youtubeEmbedSrc: "https://www.youtube.com/embed/wIzyWu9xtjA",
   },
   chingu: {
     key: "chingu",
@@ -490,6 +495,7 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     from: PROJ_POS.chinguFolder,
     expanded: { w: 355, h: 328.4 },
     dock: { x: 70, y: -10 },
+    finalDetailDock: { x: -380, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
   },
 };
@@ -505,6 +511,8 @@ function FolderOverlay({
 }) {
   const [phase, setPhase] = useState<"from" | "center" | "dock">("from");
   const [showPanel, setShowPanel] = useState(false);
+  const [ideunDetailOpen, setIdeunDetailOpen] = useState(false);
+  const [chinguDetailOpen, setChinguDetailOpen] = useState(false);
 
   useEffect(() => {
     const t = window.setTimeout(() => setPhase("center"), 40);
@@ -513,11 +521,21 @@ function FolderOverlay({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (cfg.key === "ideun" && ideunDetailOpen) {
+          setIdeunDetailOpen(false);
+          return;
+        }
+        if (cfg.key === "chingu" && chinguDetailOpen) {
+          setChinguDetailOpen(false);
+          return;
+        }
+        onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [cfg.key, ideunDetailOpen, chinguDetailOpen, onClose]);
 
   const fromRect = {
     x: cfg.from.x,
@@ -533,12 +551,25 @@ function FolderOverlay({
     h: cfg.expanded.h,
   };
 
-  const dockRect = {
+  const dockRectDefault = {
     x: cfg.dock.x,
     y: cfg.dock.y + CONTENT_PAD_TOP,
     w: cfg.expanded.w,
     h: cfg.expanded.h,
   };
+
+  const dockRectFinalDetail = {
+    x: (cfg.finalDetailDock?.x ?? cfg.dock.x),
+    y: (cfg.finalDetailDock?.y ?? cfg.dock.y) + CONTENT_PAD_TOP,
+    w: cfg.expanded.w,
+    h: cfg.expanded.h,
+  };
+
+  const detailTakeoverOpen =
+    (cfg.key === "ideun" && ideunDetailOpen) ||
+    (cfg.key === "chingu" && chinguDetailOpen);
+
+  const dockRect = detailTakeoverOpen ? dockRectFinalDetail : dockRectDefault;
 
   const rect =
     phase === "from" ? fromRect : phase === "center" ? centerRect : dockRect;
@@ -546,6 +577,13 @@ function FolderOverlay({
 
   const videoSrc = VIDEO_BY_FOLDER[cfg.key];
   const youtubeEmbedSrc = cfg.youtubeEmbedSrc;
+  const showRightPanel = !detailTakeoverOpen;
+
+  const closeAll = () => {
+    setIdeunDetailOpen(false);
+    setChinguDetailOpen(false);
+    onClose();
+  };
 
   return (
     <div
@@ -598,7 +636,7 @@ function FolderOverlay({
       `}</style>
 
       <div
-        onClick={onClose}
+        onClick={closeAll}
         style={{
           position: "absolute",
           inset: 0,
@@ -616,11 +654,52 @@ function FolderOverlay({
           transform: `translateX(-50%) scale(${scale})`,
           transformOrigin: "top center",
           width: DESIGN.w,
-          height: "100vh",
+          height: `calc(100vh / ${scale})`,
           pointerEvents: "none",
         }}
       >
-        {/* Animated folder */}
+        {cfg.key === "ideun" && ideunDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <IdeunFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setIdeunDetailOpen(false)}
+            />
+          </div>
+        ) : null}
+
+        {cfg.key === "chingu" && chinguDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ChinguFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setChinguDetailOpen(false)}
+            />
+          </div>
+        ) : null}
+
         <div
           style={{
             position: "absolute",
@@ -631,6 +710,7 @@ function FolderOverlay({
             pointerEvents: "auto",
             borderRadius: 18,
             overflow: "hidden",
+            zIndex: 2,
             transition:
               "left 520ms cubic-bezier(.2,.9,.2,1), top 520ms cubic-bezier(.2,.9,.2,1), width 520ms cubic-bezier(.2,.9,.2,1), height 520ms cubic-bezier(.2,.9,.2,1), box-shadow 520ms ease",
             boxShadow:
@@ -662,7 +742,7 @@ function FolderOverlay({
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={closeAll}
             aria-label="Close folder popup"
             style={{
               position: "absolute",
@@ -685,96 +765,118 @@ function FolderOverlay({
           </button>
         </div>
 
-        {/* Right-side panel */}
-        <div
-          style={{
-            position: "absolute",
-            left: dockRect.x + dockRect.w + cfg.panel.gap,
-            top: panelTop,
-            width: cfg.panel.w,
-            height: cfg.panel.h,
-            pointerEvents: "auto",
-            opacity: showPanel ? 1 : 0,
-            transform: showPanel ? "translateX(0px)" : "translateX(14px)",
-            transition: "opacity 360ms ease, transform 360ms ease",
-            borderRadius: 20,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(0,0,0,0.30)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            boxShadow: "0 24px 70px rgba(0,0,0,0.35)",
-            overflow: "hidden",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
+        {showRightPanel && (
           <div
             style={{
               position: "absolute",
-              inset: 0,
-              padding: 14,
-              display: "flex",
-              flexDirection: "column",
-              gap: 14,
+              left: dockRect.x + dockRect.w + cfg.panel.gap,
+              top: panelTop,
+              width: cfg.panel.w,
+              height: cfg.panel.h,
+              pointerEvents: "auto",
+              opacity: showPanel ? 1 : 0,
+              transform: showPanel ? "translateX(0px)" : "translateX(14px)",
+              transition: "opacity 360ms ease, transform 360ms ease",
+              borderRadius: 20,
+              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(0,0,0,0.30)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.35)",
+              overflow: "hidden",
+              zIndex: 2,
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <div
               style={{
-                flex: 1,
-                borderRadius: 18,
-                overflow: "hidden",
-                border: "1px solid rgba(255,255,255,0.10)",
-                background: "rgba(255,255,255,0.03)",
+                position: "absolute",
+                inset: 0,
+                padding: 14,
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                flexDirection: "column",
+                gap: 14,
               }}
             >
-              {youtubeEmbedSrc ? (
-                <iframe
-                  src={youtubeEmbedSrc}
-                  title={`${cfg.key} video`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    border: "none",
-                    display: "block",
-                  }}
-                />
-              ) : (
-                <VideoCard src={videoSrc} autoPlay />
-              )}
-            </div>
+              <div
+                style={{
+                  flex: 1,
+                  borderRadius: 18,
+                  overflow: "hidden",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  background: "rgba(255,255,255,0.03)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {cfg.key === "chingu" ? (
+                  <div
+                    style={{
+                      color: "rgba(255,255,255,0.75)",
+                      fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial",
+                      fontSize: 18,
+                      letterSpacing: 0.2,
+                    }}
+                  >
+                    Coming soon
+                  </div>
+                ) : youtubeEmbedSrc ? (
+                  <iframe
+                    src={youtubeEmbedSrc}
+                    title={`${cfg.key} video`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                      display: "block",
+                    }}
+                  />
+                ) : (
+                  <VideoCard src={videoSrc} autoPlay />
+                )}
+              </div>
 
-            <button
-              type="button"
-              aria-label="Find out more"
-              onClick={() => {
-                // later:
-                // window.location.href = `/projects/${cfg.key}`;
-              }}
-              style={{
-                width: "fit-content",
-                background: "transparent",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                alignSelf: "flex-start",
-              }}
-            >
-              <Image
-                src={FIND_OUT_MORE_SRC}
-                alt="Find out more"
-                width={220}
-                height={56}
-                priority
-                style={{ width: 220, height: "auto", objectFit: "contain" }}
-              />
-            </button>
+              <button
+                type="button"
+                aria-label="Find out more"
+                onClick={() => {
+                  if (cfg.key === "ideun") {
+                    setIdeunDetailOpen(true);
+                    if (phase !== "dock") setPhase("dock");
+                  }
+
+                  if (cfg.key === "chingu") {
+                    setChinguDetailOpen(true);
+                    if (phase !== "dock") setPhase("dock");
+                  }
+                }}
+                style={{
+                  width: "fit-content",
+                  background: "transparent",
+                  border: "none",
+                  padding: 0,
+                  cursor:
+                    cfg.key === "ideun" || cfg.key === "chingu" ? "pointer" : "default",
+                  alignSelf: "flex-start",
+                  opacity: cfg.key === "ideun" || cfg.key === "chingu" ? 1 : 0.6,
+                }}
+              >
+                <Image
+                  src={FIND_OUT_MORE_SRC}
+                  alt="Find out more"
+                  width={220}
+                  height={56}
+                  priority
+                  style={{ width: 220, height: "auto", objectFit: "contain" }}
+                />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -784,7 +886,6 @@ export default function ProjectsPage() {
   const { stageRef, scale } = useFitScale(DESIGN);
   const [openKey, setOpenKey] = useState<FolderKey | null>(null);
 
-  // Load model-viewer once
   useEffect(() => {
     const id = "model-viewer-script";
     if (document.getElementById(id)) return;
@@ -830,10 +931,8 @@ export default function ProjectsPage() {
         position: "relative",
       }}
     >
-      {/* Overlay */}
       {cfg && <FolderOverlay cfg={cfg} scale={scale} onClose={() => setOpenKey(null)} />}
 
-      {/* Keyframes for hover effects */}
       <style>{`
         @keyframes edgeFlicker {
           0%   { filter: drop-shadow(0 0 0px rgba(255,255,255,0.0))
@@ -870,7 +969,6 @@ export default function ProjectsPage() {
         }
       `}</style>
 
-      {/* Fixed background */}
       <div
         style={{
           position: "fixed",
@@ -904,7 +1002,6 @@ export default function ProjectsPage() {
         <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
       </div>
 
-      {/* Fixed navbar */}
       <div
         style={{
           position: "fixed",
@@ -995,7 +1092,6 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Content */}
       <div style={{ position: "relative", zIndex: 2, width: "100%", height: "100%" }}>
         <div
           style={{
