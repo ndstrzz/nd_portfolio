@@ -131,7 +131,6 @@ export default function Page() {
     document.head.appendChild(s);
   }, []);
 
-  // ✅ Updated hrefs (About goes to /about)
   const navItems = useMemo(
     () => [
       { src: "/assets/Home.svg", alt: "Home", href: "/" },
@@ -144,9 +143,21 @@ export default function Page() {
 
   const iconItems = useMemo(
     () => [
-      { src: "/assets/email_icon.svg", alt: "Email", href: "mailto:andynilessim05@gmail.com" },
-      { src: "/assets/linkedin_icon.svg", alt: "LinkedIn", href: "#" },
-      { src: "/assets/telegram_icon.svg", alt: "Telegram", href: "#" },
+      {
+        src: "/assets/email_icon.svg",
+        alt: "Email",
+        href: "mailto:andynilessim05@gmail.com",
+      },
+      {
+        src: "/assets/linkedin_icon.svg",
+        alt: "LinkedIn",
+        href: "https://www.linkedin.com/in/andy-sim-61b261287/",
+      },
+      {
+        src: "/assets/telegram_icon.svg",
+        alt: "Telegram",
+        href: "https://t.me/kombuchaddict",
+      },
     ],
     []
   );
@@ -313,15 +324,39 @@ export default function Page() {
               priority
             />
 
-            <Asset
-              src="/assets/say_hi_button.svg"
-              alt="Say hi button"
-              x={POS.sayHi.x}
-              y={POS.sayHi.y}
-              w={POS.sayHi.w}
-              h={POS.sayHi.h}
-              priority
-            />
+            <a
+              href="mailto:andynilessim05@gmail.com"
+              aria-label="Say hi"
+              style={{
+                position: "absolute",
+                left: POS.sayHi.x,
+                top: POS.sayHi.y,
+                width: POS.sayHi.w,
+                height: POS.sayHi.h,
+                display: "block",
+                cursor: "pointer",
+                borderRadius: 12,
+                transition: "transform 120ms ease, opacity 120ms ease",
+              }}
+              onMouseDown={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(0.98)";
+              }}
+              onMouseUp={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+              }}
+            >
+              <Image
+                src="/assets/say_hi_button.svg"
+                alt="Say hi button"
+                width={POS.sayHi.w}
+                height={POS.sayHi.h}
+                priority
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </a>
 
             <Asset
               src="/assets/kuro_waving.gif"

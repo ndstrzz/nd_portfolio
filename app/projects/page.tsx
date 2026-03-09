@@ -5,6 +5,8 @@ import Image from "next/image";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import IdeunFindOutMoreFrame from "./_components/IdeunFindOutMoreFrame";
 import ChinguFindOutMoreFrame from "./_components/ChinguFindOutMoreFrame";
+import TaedalFindOutMoreFrame from "../experience/_components/TaedalFindOutMoreFrame";
+import OcbcFindOutMoreFrame from "../experience/_components/OcbcFindOutMoreFrame";
 
 declare global {
   namespace JSX {
@@ -26,19 +28,18 @@ const NAV_POS = {
   topIcons: { x: 1669, y: 51, w: 31, h: 26, gap: 27 },
 };
 
-// From your screenshots (Frame 14)
 const PROJ_POS = {
-  header: { x: 192, y: 39, w: 812.35, h: 132 }, // project_icon_with_description.svg
-  personalTitle: { x: 62, y: 200, w: 735.35, h: 37 }, // personal_project.svg
+  header: { x: 192, y: 39, w: 812.35, h: 132 },
+  personalTitle: { x: 62, y: 200, w: 735.35, h: 37 },
 
-  taedalFolder: { x: 243, y: 237, w: 179, h: 167 }, // taedal_folder.svg
+  taedalFolder: { x: 243, y: 237, w: 179, h: 167 },
 
-  internshipsTitle: { x: 2, y: 440, w: 735.35, h: 37 }, // internships.svg
-  ocbcFolder: { x: 243, y: 469, w: 181, h: 167 }, // ocbc_folder.svg
+  internshipsTitle: { x: 2, y: 440, w: 735.35, h: 37 },
+  ocbcFolder: { x: 243, y: 469, w: 181, h: 167 },
 
-  hackathonsTitle: { x: 32, y: 672, w: 735.35, h: 37 }, // hackathons.svg
-  ideunFolder: { x: 243, y: 701, w: 179, h: 167 }, // ideun_folder.svg
-  chinguFolder: { x: 458, y: 701, w: 179, h: 167 }, // chingu_folder.svg
+  hackathonsTitle: { x: 32, y: 672, w: 735.35, h: 37 },
+  ideunFolder: { x: 243, y: 701, w: 179, h: 167 },
+  chinguFolder: { x: 458, y: 701, w: 179, h: 167 },
 };
 
 function useFitScale(design: Size) {
@@ -132,11 +133,6 @@ function Asset({
   );
 }
 
-/**
- * FolderButton
- * - keeps your hover glow/sweep
- * - if onClick is provided: prevents navigation + triggers overlay
- */
 function FolderButton({
   href,
   ariaLabel,
@@ -235,12 +231,6 @@ function FolderButton({
   );
 }
 
-/**
- * VideoCard
- * - autoplay (muted) when it appears (browser policy)
- * - when user clicks play, it UNMUTES and plays with sound
- * - center play/pause only shows on hover (or when paused)
- */
 function VideoCard({
   src,
   autoPlay,
@@ -448,11 +438,8 @@ type FolderOverlayConfig = {
 };
 
 const FIND_OUT_MORE_SRC = "/assets/taedal-deck/find_out_more.svg";
-
-// Your requested video panel dimensions
 const VIDEO_DIM = { w: 1380, h: 920 };
 
-// Video source per folder (fallback for non-YouTube folders)
 const VIDEO_BY_FOLDER: Record<FolderKey, string> = {
   ocbc: "/assets/folder/ocbc/ideun_video.mp4",
   taedal: "/assets/folder/taedal/taedal_video.mov",
@@ -478,6 +465,7 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     dock: { x: 70, y: -10 },
     finalDetailDock: { x: -380, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
+    youtubeEmbedSrc: "https://www.youtube.com/embed/TRokrwZoiW4",
   },
   ideun: {
     key: "ideun",
@@ -511,8 +499,11 @@ function FolderOverlay({
 }) {
   const [phase, setPhase] = useState<"from" | "center" | "dock">("from");
   const [showPanel, setShowPanel] = useState(false);
+
   const [ideunDetailOpen, setIdeunDetailOpen] = useState(false);
   const [chinguDetailOpen, setChinguDetailOpen] = useState(false);
+  const [taedalDetailOpen, setTaedalDetailOpen] = useState(false);
+  const [ocbcDetailOpen, setOcbcDetailOpen] = useState(false);
 
   useEffect(() => {
     const t = window.setTimeout(() => setPhase("center"), 40);
@@ -530,12 +521,28 @@ function FolderOverlay({
           setChinguDetailOpen(false);
           return;
         }
+        if (cfg.key === "taedal" && taedalDetailOpen) {
+          setTaedalDetailOpen(false);
+          return;
+        }
+        if (cfg.key === "ocbc" && ocbcDetailOpen) {
+          setOcbcDetailOpen(false);
+          return;
+        }
         onClose();
       }
     };
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [cfg.key, ideunDetailOpen, chinguDetailOpen, onClose]);
+  }, [
+    cfg.key,
+    ideunDetailOpen,
+    chinguDetailOpen,
+    taedalDetailOpen,
+    ocbcDetailOpen,
+    onClose,
+  ]);
 
   const fromRect = {
     x: cfg.from.x,
@@ -567,7 +574,9 @@ function FolderOverlay({
 
   const detailTakeoverOpen =
     (cfg.key === "ideun" && ideunDetailOpen) ||
-    (cfg.key === "chingu" && chinguDetailOpen);
+    (cfg.key === "chingu" && chinguDetailOpen) ||
+    (cfg.key === "taedal" && taedalDetailOpen) ||
+    (cfg.key === "ocbc" && ocbcDetailOpen);
 
   const dockRect = detailTakeoverOpen ? dockRectFinalDetail : dockRectDefault;
 
@@ -582,6 +591,8 @@ function FolderOverlay({
   const closeAll = () => {
     setIdeunDetailOpen(false);
     setChinguDetailOpen(false);
+    setTaedalDetailOpen(false);
+    setOcbcDetailOpen(false);
     onClose();
   };
 
@@ -696,6 +707,48 @@ function FolderOverlay({
               open={true}
               topY={0}
               onClose={() => setChinguDetailOpen(false)}
+            />
+          </div>
+        ) : null}
+
+        {cfg.key === "taedal" && taedalDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <TaedalFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setTaedalDetailOpen(false)}
+            />
+          </div>
+        ) : null}
+
+        {cfg.key === "ocbc" && ocbcDetailOpen ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: DESIGN.w,
+              height: `calc(100vh / ${scale})`,
+              pointerEvents: "auto",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <OcbcFindOutMoreFrame
+              open={true}
+              topY={0}
+              onClose={() => setOcbcDetailOpen(false)}
             />
           </div>
         ) : null}
@@ -853,6 +906,16 @@ function FolderOverlay({
                     setChinguDetailOpen(true);
                     if (phase !== "dock") setPhase("dock");
                   }
+
+                  if (cfg.key === "taedal") {
+                    setTaedalDetailOpen(true);
+                    if (phase !== "dock") setPhase("dock");
+                  }
+
+                  if (cfg.key === "ocbc") {
+                    setOcbcDetailOpen(true);
+                    if (phase !== "dock") setPhase("dock");
+                  }
                 }}
                 style={{
                   width: "fit-content",
@@ -860,9 +923,20 @@ function FolderOverlay({
                   border: "none",
                   padding: 0,
                   cursor:
-                    cfg.key === "ideun" || cfg.key === "chingu" ? "pointer" : "default",
+                    cfg.key === "ideun" ||
+                    cfg.key === "chingu" ||
+                    cfg.key === "taedal" ||
+                    cfg.key === "ocbc"
+                      ? "pointer"
+                      : "default",
                   alignSelf: "flex-start",
-                  opacity: cfg.key === "ideun" || cfg.key === "chingu" ? 1 : 0.6,
+                  opacity:
+                    cfg.key === "ideun" ||
+                    cfg.key === "chingu" ||
+                    cfg.key === "taedal" ||
+                    cfg.key === "ocbc"
+                      ? 1
+                      : 0.6,
                 }}
               >
                 <Image
