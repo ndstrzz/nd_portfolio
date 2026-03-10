@@ -460,7 +460,7 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     from: PROJ_POS.taedalFolder,
     expanded: { w: 355, h: 328.4 },
     dock: { x: 70, y: -10 },
-    finalDetailDock: { x: -380, y: -10 },
+    finalDetailDock: { x: -200, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
   },
   ocbc: {
@@ -469,7 +469,7 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     from: PROJ_POS.ocbcFolder,
     expanded: { w: 355, h: 328.4 },
     dock: { x: 70, y: -10 },
-    finalDetailDock: { x: -380, y: -10 },
+    finalDetailDock: { x: -200, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
     youtubeEmbedSrc: "https://www.youtube.com/embed/TRokrwZoiW4",
   },
@@ -489,7 +489,7 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     from: PROJ_POS.chinguFolder,
     expanded: { w: 355, h: 328.4 },
     dock: { x: 70, y: -10 },
-    finalDetailDock: { x: -380, y: -10 },
+    finalDetailDock: { x: -200, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
   },
 };
@@ -572,7 +572,7 @@ function FolderOverlay({
   };
 
   const dockRectFinalDetail = {
-    x: (cfg.finalDetailDock?.x ?? cfg.dock.x),
+    x: cfg.finalDetailDock?.x ?? cfg.dock.x,
     y: (cfg.finalDetailDock?.y ?? cfg.dock.y) + CONTENT_PAD_TOP,
     w: cfg.expanded.w,
     h: cfg.expanded.h,
