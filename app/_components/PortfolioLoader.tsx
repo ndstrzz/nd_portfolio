@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
 type PortfolioLoaderProps = {
-  minDurationMs?: number;
+  maxDurationMs?: number;
   onDone?: () => void;
 };
 
@@ -59,7 +59,7 @@ function preloadGLB(src: string) {
 }
 
 export default function PortfolioLoader({
-  minDurationMs = 1800,
+  maxDurationMs = 5000,
   onDone,
 }: PortfolioLoaderProps) {
   const [progress, setProgress] = useState(0);
@@ -104,8 +104,6 @@ export default function PortfolioLoader({
     let mounted = true;
 
     const run = async () => {
-      const start = Date.now();
-
       const tasks: Array<Promise<void>> = [
         preloadModelViewerScript(),
         preloadGLB("/assets/taedal-coin.glb"),
@@ -119,27 +117,27 @@ export default function PortfolioLoader({
       const tick = () => {
         doneCount += 1;
         if (!mounted) return;
-        setProgress(Math.min(100, Math.round((doneCount / total) * 100)));
+        setProgress(Math.min(95, Math.round((doneCount / total) * 95)));
       };
 
       const wrappedImageTasks = assets.map((src) =>
-        preloadImage(src).then(tick)
+        preloadImage(src).then(tick).catch(tick)
       );
 
       const wrappedOtherTasks = tasks.map((p) =>
         p.then(tick).catch(tick)
       );
 
-      await Promise.all([...wrappedImageTasks, ...wrappedOtherTasks]);
+      const allPreloads = Promise.all([...wrappedImageTasks, ...wrappedOtherTasks]);
 
-      const elapsed = Date.now() - start;
-      const waitMore = Math.max(0, minDurationMs - elapsed);
+      const timeoutCap = new Promise<void>((resolve) => {
+        window.setTimeout(resolve, maxDurationMs);
+      });
 
-      if (waitMore > 0) {
-        await new Promise((r) => window.setTimeout(r, waitMore));
-      }
+      await Promise.race([allPreloads, timeoutCap]);
 
       if (!mounted) return;
+
       setProgress(100);
       setPhase("fadeOut");
 
@@ -153,7 +151,7 @@ export default function PortfolioLoader({
     return () => {
       mounted = false;
     };
-  }, [assets, minDurationMs, onDone]);
+  }, [assets, maxDurationMs, onDone]);
 
   return (
     <div

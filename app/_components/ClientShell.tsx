@@ -24,7 +24,7 @@ export default function ClientShell({
 
   return (
     <>
-      {showLoader ? <PortfolioLoader minDurationMs={1800} onDone={handleDone} /> : null}
+      {showLoader ? <PortfolioLoader maxDurationMs={5000} onDone={handleDone} /> : null}
       <div
         style={{
           opacity: showLoader ? 0 : 1,
