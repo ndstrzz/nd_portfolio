@@ -59,7 +59,7 @@ function preloadGLB(src: string) {
 }
 
 export default function PortfolioLoader({
-  maxDurationMs = 5000,
+  maxDurationMs = 10000,
   onDone,
 }: PortfolioLoaderProps) {
   const [progress, setProgress] = useState(0);
