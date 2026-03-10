@@ -16,11 +16,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Andy Sim Portfolio",
   description: "Portfolio of Sim Wei Bin Andy",
-  icons: {
-    icon: "/nd-favicon.png",
-    shortcut: "/nd-favicon.png",
-    apple: "/nd-favicon.png",
-  },
 };
 
 export default function RootLayout({

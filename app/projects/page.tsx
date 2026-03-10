@@ -1,4 +1,3 @@
-// C:\Users\User\Downloads\andy_portfolio\app\projects\page.tsx
 "use client";
 
 import Image from "next/image";
@@ -303,10 +302,11 @@ function VideoCard({
     const t = window.setTimeout(async () => {
       try {
         v.muted = true;
+        v.volume = 0;
         setMuted(true);
         await v.play();
       } catch {}
-    }, 180);
+    }, 80);
 
     return () => window.clearTimeout(t);
   }, [autoPlay]);
@@ -332,8 +332,10 @@ function VideoCard({
         ref={videoRef}
         src={src}
         playsInline
-        preload="metadata"
+        preload="auto"
         muted
+        autoPlay={!!autoPlay}
+        loop
         onCanPlay={() => setReady(true)}
         style={{
           width: "100%",
@@ -471,7 +473,8 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     dock: { x: 70, y: -10 },
     finalDetailDock: { x: -200, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
-    youtubeEmbedSrc: "https://www.youtube.com/embed/TRokrwZoiW4",
+    youtubeEmbedSrc:
+      "https://www.youtube.com/embed/TRokrwZoiW4?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1",
   },
   ideun: {
     key: "ideun",
@@ -481,7 +484,8 @@ const FOLDERS: Record<FolderKey, FolderOverlayConfig> = {
     dock: { x: 70, y: -10 },
     finalDetailDock: { x: -200, y: -10 },
     panel: { w: VIDEO_DIM.w, h: VIDEO_DIM.h, gap: 42, dy: -10 },
-    youtubeEmbedSrc: "https://www.youtube.com/embed/wIzyWu9xtjA",
+    youtubeEmbedSrc:
+      "https://www.youtube.com/embed/wIzyWu9xtjA?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1",
   },
   chingu: {
     key: "chingu",
@@ -783,7 +787,7 @@ function FolderOverlay({
 
             if (phase === "center") {
               setPhase("dock");
-              window.setTimeout(() => setShowPanel(true), 160);
+              window.setTimeout(() => setShowPanel(true), 60);
             }
           }}
         >
@@ -876,11 +880,13 @@ function FolderOverlay({
                       fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial",
                       fontSize: 18,
                       letterSpacing: 0.2,
+                      padding: 24,
+                      textAlign: "center",
+                      lineHeight: 1.6,
                     }}
                   >
                     No video has been published by the organiser yet, please click the{" "}
-                    “Find Out More”{" "}
-                    button to read my experience here.
+                    “Find Out More” button to read my experience here.
                   </div>
                 ) : youtubeEmbedSrc ? (
                   <iframe
