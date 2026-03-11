@@ -354,6 +354,14 @@ const TERM2_EVENTS: EventBlock[] = [
   },
 ];
 
+function getDefaultRevealed(term: "first" | "second") {
+  const firstEvent = (term === "first" ? TERM1_EVENTS : TERM2_EVENTS)[0];
+  return new Set<string>([
+    `${firstEvent.key}-title`,
+    `${firstEvent.key}-chunk`,
+  ]);
+}
+
 function AbsImage({
   rect,
   priority,
@@ -536,7 +544,7 @@ export default function OcbcFindOutMoreFrame({
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportH, setViewportH] = useState(0);
-  const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [revealedIds, setRevealedIds] = useState<Set<string>>(getDefaultRevealed("first"));
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -561,7 +569,7 @@ export default function OcbcFindOutMoreFrame({
     setShowBackToTop(false);
     setScrollTop(0);
     setViewportH(el.clientHeight);
-    setRevealedIds(new Set());
+    setRevealedIds(getDefaultRevealed(term));
   }, [term, open]);
 
   useEffect(() => {
